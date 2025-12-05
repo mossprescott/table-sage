@@ -253,4 +253,157 @@ matches =
             , final bre 0 1 mci
             ]
         ]
+    , Round 8
+        [ Day "Saturday"
+            "2025-10-18"
+            [ final bha 2 1 new
+            , final bur 2 0 lee
+            , final cry 3 3 bou
+            , final ful 0 1 ars
+            , final mci 2 0 eve
+            , final che 3 0 nfo
+            , final sun 2 0 wol
+            ]
+        , Day "Sunday"
+            "2025-10-19"
+            [ final liv 1 2 mun
+            , final tot 1 2 avl
+            ]
+        , Day "Monday"
+            "2025-10-20"
+            [ final whu 0 2 bre ]
+        ]
+    , Round 9
+        [ Day "Friday"
+            "2025-10-24"
+            [ final lee 2 1 whu
+            ]
+        , Day "Saturday"
+            "2025-10-25"
+            [ final che 1 2 sun
+            , final new 2 1 ful
+            , final mun 4 2 bha
+            , final bre 3 2 liv
+            ]
+        , Day "Sunday"
+            "2025-10-26"
+            [ final ars 1 0 cry
+            , final avl 1 0 mci
+            , final bou 2 0 nfo
+            , final eve 0 3 tot
+            , final wol 2 3 bur
+            ]
+        ]
+    , Round 10
+        [ Day "Saturday"
+            "2025-11-01"
+            [ final bha 3 0 lee
+            , final bur 0 2 ars
+            , final cry 2 0 bre
+            , final ful 3 0 wol
+            , final nfo 2 2 mun
+            , final tot 0 1 che
+            , final liv 2 0 avl
+            ]
+        , Day "Sunday"
+            "2025-11-02"
+            [ final whu 3 1 new
+            , final mci 3 1 bou
+            ]
+        , Day "Monday"
+            "2025-11-03"
+            [ final sun 1 1 eve ]
+        ]
+    , Round 11
+        [ Day "Saturday"
+            "2025-11-08"
+            [ final tot 2 2 mun
+            , final eve 2 0 ful
+            , final whu 3 2 bur
+            , final sun 2 2 ars
+            , final che 3 0 wol
+            , final avl 4 0 bou
+            , final bre 3 1 new
+            , final cry 0 0 bha
+            , final nfo 3 1 lee
+            , final mci 3 0 liv
+            ]
+        ]
+    , Round 12
+        [ Day "Saturday"
+            "2025-11-22"
+            [ final bur 0 2 che
+            , final bou 2 2 whu
+            , final bha 2 1 bre
+            , final ful 1 0 sun
+            , final liv 0 3 nfo
+            , final wol 0 2 cry
+            , final new 2 1 mci
+            ]
+        , Day "Sunday"
+            "2025-11-23"
+            [ final lee 1 2 avl
+            , final ars 4 1 tot
+            ]
+        , Day "Monday"
+            "2025-11-24"
+            [ final mun 0 1 eve ]
+        ]
+    , Round 13
+        [ Day "Saturday"
+            "2025-11-29"
+            [ final bre 3 1 bur
+            , final mci 3 2 lee
+            , final sun 3 2 bou
+            , final eve 1 4 new
+            , final tot 1 2 ful
+            ]
+        , Day "Sunday"
+            "2025-11-30"
+            [ final cry 1 2 mun
+            , final avl 1 0 wol
+            , final nfo 0 2 bha
+            , final whu 0 2 liv
+            , final che 1 1 ars
+            ]
+        ]
+    , Round 14
+        [ Day "Tuesday"
+            "2025-12-02"
+            [ final bou 0 1 eve
+            , final ful 4 5 mci
+            , final new 2 2 tot
+            ]
+        , Day "Wednesday"
+            "2025-12-03"
+            [ final ars 2 0 bre
+            , final bha 3 4 avl
+            , final bur 0 1 cry
+            , final wol 0 1 nfo
+            , final lee 3 1 che
+            , final liv 1 1 sun
+            ]
+        , Day "Thursday"
+            "2025-12-04"
+            [ final mun 1 1 whu ]
+        ]
+
+    -- , Round 15
+    --     [ Day "Saturday"
+    --         "2025-12-06"
+    --         [ pending avl ars
+    --         , pending bou che
+    --         , pending eve nfo
+    --         , pending mci sun
+    --         , pending new bur
+    --         , pending tot bre
+    --         , pending lee liv
+    --         ]
+    --     , Day "Sunday"
+    --         "2025-12-07"
+    --         [ pending bha whu ]
+    --     , Day "Sunday"
+    --         "2025-12-07"
+    --         [ pending ful cry ]
+    --     ]
     ]
