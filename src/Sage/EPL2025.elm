@@ -185,6 +185,7 @@ matches =
             , final eve 0 0 avl
             , final ful 1 0 lee
             , final new 1 0 wol
+            , final whu 0 3 tot
             , final bre 2 2 che
             ]
         , Day "Sunday"
