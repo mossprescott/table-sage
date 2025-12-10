@@ -9,7 +9,7 @@ import Element.Font as Font
 import Html exposing (Html)
 import Sage.EPL2025 as EPL2025
 import Sage.Football exposing (toScores)
-import Sage.Plot exposing (Dot, plot)
+import Sage.Plot exposing (Dot, Style(..), plot)
 
 
 main : Program () Model Msg
@@ -50,19 +50,20 @@ view model =
             [ el [ Font.size 16 ] <|
                 text "Premier League 2025–6: First Half"
             , el
-                [ Element.height <| Element.px 400
+                [ Element.height <| Element.px 300
+                , Element.width <| Element.px 400
                 , Element.padding 20
                 , Font.size 8
                 ]
               <|
                 Element.html <|
-                    plot (toScores EPL2025.matches) OnHover model.hovering
+                    plot OnHover Simple (toScores EPL2025.matches) model.hovering
 
             -- , column []
             --     (toScores EPL2025.matches |> List.map (Debug.toString >> text))
-            , el
-                [ Font.family [ Font.monospace ]
-                , Font.size 8
-                ]
-                (model.hovering |> Debug.toString |> text)
+            -- , column
+            --     [ Font.family [ Font.monospace ]
+            --     , Font.size 8
+            --     ]
+            --     (model.hovering |> List.map (Debug.toString >> Debug.log "" >> text))
             ]

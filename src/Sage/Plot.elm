@@ -1,4 +1,4 @@
-module Sage.Plot exposing (Data, Dot, Score, Team, plot)
+module Sage.Plot exposing (Data, Dot, Score, Style(..), Team, plot)
 
 import Array
 import Chart as C
@@ -38,13 +38,19 @@ type alias Dot =
     CI.One ( Int, Team ) CI.Dot
 
 
-plot : Data -> (List Dot -> msg) -> List Dot -> Html msg
-plot data onHover hovering =
+type Style
+    = Simple
+    | Flatter
+
+
+plot : (List Dot -> msg) -> Style -> Data -> List Dot -> Html msg
+plot onHover style data hovering =
     let
         toY : List Score -> Int -> Maybe Float
         toY scores round =
             Array.fromList scores
                 |> Array.get round
+                -- TODO: (-) round if style == Flatter
                 |> Maybe.map .value
 
         rounds : Team -> List Score -> C.Element ( Int, Team ) msg
@@ -54,21 +60,25 @@ plot data onHover hovering =
                 |> C.series (Tuple.first >> toFloat)
                     [ C.interpolatedMaybe
                         (Tuple.first >> toY scores)
-                        [ CA.color team.color ]
+                        [ CA.color team.color
+                        ]
                         [ CA.circle
                         , CA.size 1
                         , CA.color team.color
                         ]
                         |> C.named team.name
                     ]
+
+        displayed =
+            data
     in
     C.chart
         [ CA.height 300
         , CA.width 400
         , CA.padding { top = 0, left = 30, right = 30, bottom = 0 }
+        , CA.range [ CA.lowest 1 CA.exactly, CA.highest 19 CA.exactly ]
 
-        -- , CA.range [ CA.lowest 1 CA.exactly, CA.highest 19 CA.exactly ]
-        , CA.domain [ CA.lowest 0 CA.exactly, CA.highest 40 CA.orHigher ]
+        -- , CA.domain [ CA.lowest 0 CA.orLower, CA.highest 40 CA.orHigher ]
         , CE.onMouseMove onHover (CE.getNearest CI.dots)
         , CE.onMouseLeave (onHover [])
         ]
@@ -76,18 +86,19 @@ plot data onHover hovering =
         [ C.xLabels [ CA.withGrid, CA.fontSize 12 ]
         , C.yLabels [ CA.withGrid, CA.fontSize 12 ]
         ]
-            ++ List.map (\( t, ss ) -> rounds t ss) data
+            ++ List.map (\( t, ss ) -> rounds t ss) displayed
             ++ [ C.each hovering <|
                     \p item ->
-                        [ C.tooltip item [] [] [] ]
+                        [ C.tooltip item
+                            []
+                            []
+                            [--Html.text <| Debug.toString <| CI.getCenter p item
+                            ]
+                        ]
+               , C.legendsAt .max
+                    .max
+                    [ CA.column
+                    , CA.spacing 1
+                    ]
+                    []
                ]
-
-
-
--- ++ [ C.legendsAt .max
---         .max
---         [ CA.column
---         , CA.spacing 1
---         ]
---         []
---    ]
