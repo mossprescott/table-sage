@@ -16,7 +16,6 @@ import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
 import Chart.Item as CI
-import Chart.Svg exposing (Plane)
 import FormatNumber as FN
 import FormatNumber.Locales as FNL exposing (Locale, usLocale)
 import Html exposing (Html)
@@ -116,8 +115,8 @@ pointsLocale =
     { usLocale | decimals = FNL.Max 1 }
 
 
-plot : (List Dot -> msg) -> Style -> Data -> List Dot -> Html msg
-plot onHover style data hovering =
+plot : (List Dot -> msg) -> Style -> Int -> Int -> Data -> List Dot -> Html msg
+plot onHover style width height data hovering =
     let
         toY : Array Score -> Int -> Maybe Float
         toY scores round =
@@ -159,7 +158,7 @@ plot onHover style data hovering =
                 [ Html.text (field team)
                 ]
 
-        tooltip : Plane -> Dot -> List (Element msg)
+        tooltip : plane -> Dot -> List (Element msg)
         tooltip _ item =
             let
                 ( round, team ) =
@@ -211,17 +210,64 @@ plot onHover style data hovering =
                     ]
             in
             [ C.tooltip item
-                []
+                [ CA.onLeftOrRight ]
                 []
                 (score
                     |> Maybe.map scoreView
                     |> Maybe.withDefault []
                 )
             ]
+
+        {- A tooltip-style decoration to the right of the last displayed match for a team, in lieu
+           of a legend. Seems like the way to do this is to map over _all_ the dots and annotate
+           just the ones we want.
+        -}
+        legendTip : plane -> Dot -> List (Element msg)
+        legendTip _ item =
+            let
+                ( round, team ) =
+                    CI.getData item
+
+                isLast =
+                    case data |> scoresForTeam team of
+                        Just scores ->
+                            Array.length scores == round
+
+                        Nothing ->
+                            False
+
+                scoreMay : Maybe Score
+                scoreMay =
+                    if isLast then
+                        data
+                            |> scoresForTeam team
+                            |> Maybe.andThen (Array.get (round - 1))
+
+                    else
+                        Nothing
+            in
+            case scoreMay of
+                Just score ->
+                    [ C.tooltip item
+                        [ CA.onRight
+                        , CA.background "#FFFFFFCC"
+                        ]
+                        []
+                        [ Html.span []
+                            [ Html.text <|
+                                FN.format pointsLocale score.total
+                                    ++ " "
+                            , styledTeam .name team
+                            ]
+                        ]
+                    ]
+
+                Nothing ->
+                    []
     in
     C.chart
-        [ CA.height 300
-        , CA.width 400
+        [ CA.height <| toFloat height
+        , CA.width <| toFloat width
         , CA.padding { top = 0, left = 30, right = 30, bottom = 0 }
         , CA.range [ CA.lowest 1 CA.exactly, CA.highest 19 CA.exactly ]
 
@@ -236,10 +282,12 @@ plot onHover style data hovering =
         ]
             ++ List.map (\( t, ss ) -> rounds t ss) displayed
             ++ [ C.each hovering tooltip
-               , C.legendsAt .max
-                    .max
-                    [ CA.column
-                    , CA.spacing 1
-                    ]
-                    []
+               , C.eachDot legendTip
+
+               --    , C.legendsAt .max
+               --         .max
+               --         [ CA.column
+               --         , CA.spacing 1
+               --         ]
+               --         []
                ]
