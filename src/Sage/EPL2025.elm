@@ -406,7 +406,7 @@ matches =
             ]
         , Day "Monday"
             "2025-12-08"
-            [ pending wol mun ]
+            [ final wol 1 4 mun ]
         ]
     , Round 16
         [ Day "Saturday"
