@@ -23,4 +23,4 @@ Keep improving the display:
 
 ## Demo
 
-See it in action at [index.html](index.html).
+See it in action at [index.html](https://mossprescott.github.io/table-sage/index.html).
