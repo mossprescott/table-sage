@@ -6,108 +6,108 @@ import Sage.Plot exposing (Team)
 
 ars : Team
 ars =
-    Team "Arsenal" "#EF0107"
+    Team "ARS" "Arsenal" "Arsenal" "#EF0107"
 
 
 avl : Team
 avl =
-    -- TODO
-    Team "Aston Villa" "#777777"
+    -- TODO: color(s)
+    Team "AVL" "Aston Villa" "Aston Villa" "#777777"
 
 
 bou : Team
 bou =
-    Team "AFC Bournemouth" "#B70E12"
+    Team "BOU" "Bournemouth" "AFC Bournemouth" "#B70E12"
 
 
 bre : Team
 bre =
-    Team "Brentford" "#B70E12"
+    Team "BRE" "Brentford" "Brentford" "#B70E12"
 
 
 bha : Team
 bha =
-    Team "Brighton & Hove Albion" "#0057B8"
+    Team "BHA" "Brighton" "Brighton & Hove Albion" "#0057B8"
 
 
 bur : Team
 bur =
-    Team "Burnley" "#7A263A"
+    Team "BUR" "Burnley" "Burnley" "#7A263A"
 
 
 che : Team
 che =
-    Team "Chelsea" "#034694"
+    Team "CHE" "Chelsea" "Chelsea" "#034694"
 
 
 cry : Team
 cry =
     -- TODO
-    Team "Crystal Palace" "#FF0000"
+    Team "CRY" "Crystal Palace" "Crystal Palace" "#FF0000"
 
 
 eve : Team
 eve =
-    Team "Everton" "#003399"
+    Team "EVE" "Everton" "Everton" "#003399"
 
 
 ful : Team
 ful =
     -- TODO: do something with white
-    Team "Fulham" "#CCCCCC"
+    Team "FUL" "Fulham" "Fulham" "#CCCCCC"
 
 
 lee : Team
 lee =
     -- TODO: do something with white
-    Team "Leeds United" "#CCCCCC"
+    Team "LEE" "Leeds" "Leeds United" "#CCCCCC"
 
 
 liv : Team
 liv =
-    Team "Liverpool" "#C8102E"
+    Team "LIV" "Liverpool" "Liverpool" "#C8102E"
 
 
 mci : Team
 mci =
-    Team "Manchester City" "#6CABDD"
+    Team "MCI" "Man City" "Manchester City" "#6CABDD"
 
 
 mun : Team
 mun =
-    Team "Manchester United" "#DA020E"
+    Team "MUN" "Man United" "Manchester United" "#DA020E"
 
 
 new : Team
 new =
     -- TODO: and white
-    Team "Newcastle United" "#000000"
+    Team "NEW" "Newcastle" "Newcastle United" "#000000"
 
 
 nfo : Team
 nfo =
-    Team "Nottingham Forest" "#C8102E"
+    Team "NFO" "Nottm Forest" "Nottingham Forest" "#C8102E"
 
 
 sun : Team
 sun =
-    Team "Sunderland" "#FF0000"
+    Team "SUN" "Sunderland" "Sunderland" "#FF0000"
 
 
 tot : Team
 tot =
     -- FIXME: white
-    Team "Tottenham Hotspur" "#132257"
+    Team "TOT" "Tottenham" "Tottenham Hotspur" "#132257"
 
 
 whu : Team
 whu =
-    Team "West Ham United" "#7A263A"
+    Team "WHU" "West Ham" "West Ham United" "#7A263A"
 
 
 wol : Team
 wol =
-    Team "Wolverhampton Wanderers" "#FDB913"
+    Team "WOL" "Wolves" "Wolverhampton Wanderers" "#FDB913"
 
 
 matches : List Round

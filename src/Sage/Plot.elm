@@ -23,7 +23,9 @@ import List
 
 
 type alias Team =
-    { name : String
+    { shortName : String
+    , name : String
+    , longName : String
     , color : String
 
     -- TODO: other info to show in the legend?
@@ -124,10 +126,10 @@ plot onHover style data hovering =
         displayed =
             data
 
-        styledName team =
+        styledTeam field team =
             Html.span
                 [ HA.style "color" team.color ]
-                [ Html.text team.name
+                [ Html.text (field team)
                 ]
 
         tooltip : Plane -> Dot -> List (Element msg)
@@ -152,37 +154,41 @@ plot onHover style data hovering =
 
                 scoreView : Score -> List (Html Never)
                 scoreView s =
-                    [ styledName s.match.host
-                    , Html.span [] <|
-                        case s.match.result of
-                            Final goals ->
-                                [ Html.text
-                                    (" "
-                                        ++ String.fromInt goals.host
-                                        ++ " – "
-                                        ++ String.fromInt goals.opponent
-                                        ++ " "
-                                    )
-                                ]
+                    [ Html.div []
+                        [ Html.span []
+                            [ styledTeam .name team
+                            , Html.text <| ": " ++ String.fromFloat s.total ++ " after " ++ String.fromInt round ++ " rounds"
+                            ]
+                        , Html.br [] []
+                        , styledTeam .shortName s.match.host
+                        , Html.span []
+                            [ case s.match.result of
+                                Final goals ->
+                                    Html.text
+                                        (" "
+                                            ++ String.fromInt goals.host
+                                            ++ " – "
+                                            ++ String.fromInt goals.opponent
+                                            ++ " "
+                                        )
 
-                            Projected odds ->
-                                let
-                                    total =
-                                        odds.win + odds.draw + odds.lose
-                                in
-                                [ Html.text
-                                    (" "
-                                        ++ String.fromInt (truncate (100 * odds.win / total))
-                                        ++ "% "
-                                        ++ String.fromInt (truncate (100 * odds.draw / total))
-                                        ++ "% "
-                                        ++ String.fromInt (truncate (100 * odds.lose / total))
-                                        ++ "% "
-                                    )
-                                ]
-                    , styledName s.match.opponent
-
-                    -- , Html.text <| Debug.toString score
+                                Projected odds ->
+                                    let
+                                        total =
+                                            odds.win + odds.draw + odds.lose
+                                    in
+                                    Html.text
+                                        (" "
+                                            ++ String.fromInt (truncate (100 * odds.win / total))
+                                            ++ "% "
+                                            ++ String.fromInt (truncate (100 * odds.draw / total))
+                                            ++ "% "
+                                            ++ String.fromInt (truncate (100 * odds.lose / total))
+                                            ++ "% "
+                                        )
+                            ]
+                        , styledTeam .shortName s.match.opponent
+                        ]
                     ]
             in
             [ C.tooltip item
