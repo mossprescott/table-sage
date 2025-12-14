@@ -21,10 +21,15 @@ import FormatNumber.Locales as FNL exposing (Locale, usLocale)
 import Html exposing (Html)
 import Html.Attributes as HA
 import List
+import Set exposing (Set)
+
+
+type alias TeamId =
+    String
 
 
 type alias Team =
-    { shortName : String
+    { shortName : TeamId
     , name : String
     , longName : String
     , color : String
@@ -50,10 +55,8 @@ type alias Odds =
     { win : Float, draw : Float, lose : Float }
 
 
-
--- |One of the fields from an Odds, normalized so that the three values add to 1.0.
-
-
+{-| One of the fields from an Odds, normalized so that the three values add to 1.0.
+-}
 oddsFraction : (Odds -> Float) -> Odds -> Float
 oddsFraction field odds =
     field odds / (odds.win + odds.draw + odds.lose)
@@ -72,16 +75,13 @@ type alias Score =
     }
 
 
-
--- |A series of results and total scores for each team
-
-
+{-| A series of results and total scores for each team
+-}
 type alias Data =
     List ( Team, Array Score )
 
 
-{-| Type of a single point on the plot.
-TODO: embed info about match results so it can be shown in the tooltip
+{-| Type of a single point on the plot; which identifies a team and round (match week.)
 -}
 type alias Dot =
     CI.One ( Int, Team ) CI.Dot
@@ -118,6 +118,58 @@ pointsLocale =
 plot : (List Dot -> msg) -> Style -> Int -> Int -> Data -> List Dot -> Html msg
 plot onHover style width height data hovering =
     let
+        scoreForDot : ( Int, Team ) -> Maybe Score
+        scoreForDot ( round, team ) =
+            data
+                |> scoresForTeam team
+                |> Maybe.andThen (Array.get (round - 1))
+
+        focusedTeams : Set TeamId
+        focusedTeams =
+            let
+                dotTeams : ( Int, Team ) -> List TeamId
+                dotTeams ( r, t ) =
+                    case scoreForDot ( r, t ) of
+                        Just score ->
+                            [ score.match.host.shortName
+                            , score.match.opponent.shortName
+                            ]
+
+                        Nothing ->
+                            [ t.shortName ]
+            in
+            if hovering == [] then
+                data
+                    |> List.map
+                        (Tuple.first >> .shortName)
+                    |> Set.fromList
+
+            else
+                hovering
+                    |> List.map CI.getData
+                    |> List.concatMap dotTeams
+                    |> Set.fromList
+
+        -- Subset of teams' data to display
+        displayed =
+            --data |> List.filter (Tuple.first >> .shortName >> (\n -> Set.member n focusedTeams))
+            data
+                |> List.sortBy
+                    (\( t, _ ) ->
+                        if Set.member t.shortName focusedTeams then
+                            1
+
+                        else
+                            0
+                    )
+
+        styledTeam : (Team -> String) -> Team -> Html Never
+        styledTeam field team =
+            Html.span
+                [ HA.style "color" team.color ]
+                [ Html.text (field team)
+                ]
+
         toY : Array Score -> Int -> Maybe Float
         toY scores round =
             scores
@@ -131,6 +183,13 @@ plot onHover style width height data hovering =
                             s.total
                     )
 
+        teamDisplayColor team =
+            if Set.member team.shortName focusedTeams then
+                team.color
+
+            else
+                "#EEEEEE"
+
         rounds : Team -> Array Score -> Element msg
         rounds team scores =
             List.range 1 19
@@ -138,25 +197,14 @@ plot onHover style width height data hovering =
                 |> C.series (Tuple.first >> toFloat)
                     [ C.interpolatedMaybe
                         (Tuple.first >> toY scores)
-                        [ CA.color team.color
-                        , CA.dashed [ 1, 2 ]
+                        [ CA.color <| teamDisplayColor team
                         ]
                         [ CA.circle
-                        , CA.size 1
-                        , CA.color team.color
+                        , CA.size 2
+                        , CA.color <| teamDisplayColor team
                         ]
                         |> C.named team.name
                     ]
-
-        -- Subset of teams' data to display
-        displayed =
-            data
-
-        styledTeam field team =
-            Html.span
-                [ HA.style "color" team.color ]
-                [ Html.text (field team)
-                ]
 
         tooltip : plane -> Dot -> List (Element msg)
         tooltip _ item =
@@ -166,9 +214,7 @@ plot onHover style width height data hovering =
 
                 score : Maybe Score
                 score =
-                    data
-                        |> scoresForTeam team
-                        |> Maybe.andThen (Array.get (round - 1))
+                    scoreForDot ( round, team )
 
                 scoreView : Score -> List (Html Never)
                 scoreView s =
@@ -239,9 +285,7 @@ plot onHover style width height data hovering =
                 scoreMay : Maybe Score
                 scoreMay =
                     if isLast then
-                        data
-                            |> scoresForTeam team
-                            |> Maybe.andThen (Array.get (round - 1))
+                        scoreForDot ( round, team )
 
                     else
                         Nothing
@@ -250,7 +294,9 @@ plot onHover style width height data hovering =
                 Just score ->
                     [ C.tooltip item
                         [ CA.onRight
-                        , CA.background "#FFFFFFCC"
+
+                        -- Tricky: just slightly translucent so you can (maybe) tell when there's something hidden
+                        , CA.background "#FFFFFFE7"
                         ]
                         []
                         [ Html.span []
