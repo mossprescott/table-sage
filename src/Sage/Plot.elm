@@ -17,6 +17,8 @@ import Chart.Attributes as CA
 import Chart.Events as CE
 import Chart.Item as CI
 import Chart.Svg exposing (Plane)
+import FormatNumber as FN
+import FormatNumber.Locales as FNL exposing (Locale, usLocale)
 import Html exposing (Html)
 import Html.Attributes as HA
 import List
@@ -95,6 +97,25 @@ type Style
     | Flatter
 
 
+scoresForTeam : Team -> Data -> Maybe (Array Score)
+scoresForTeam team data =
+    data
+        |> List.filterMap
+            (\( t, r ) ->
+                if t == team then
+                    Just r
+
+                else
+                    Nothing
+            )
+        |> List.head
+
+
+pointsLocale : Locale
+pointsLocale =
+    { usLocale | decimals = FNL.Max 1 }
+
+
 plot : (List Dot -> msg) -> Style -> Data -> List Dot -> Html msg
 plot onHover style data hovering =
     let
@@ -147,15 +168,7 @@ plot onHover style data hovering =
                 score : Maybe Score
                 score =
                     data
-                        |> List.filterMap
-                            (\( t, r ) ->
-                                if t == team then
-                                    Just r
-
-                                else
-                                    Nothing
-                            )
-                        |> List.head
+                        |> scoresForTeam team
                         |> Maybe.andThen (Array.get (round - 1))
 
                 scoreView : Score -> List (Html Never)
@@ -163,7 +176,7 @@ plot onHover style data hovering =
                     [ Html.div []
                         [ Html.span []
                             [ styledTeam .name team
-                            , Html.text <| ": " ++ String.fromFloat s.total ++ " after " ++ String.fromInt round ++ " rounds"
+                            , Html.text <| ": " ++ FN.format pointsLocale s.total ++ " after " ++ String.fromInt round ++ " rounds"
                             ]
                         , Html.br [] []
                         , styledTeam .shortName s.match.host
