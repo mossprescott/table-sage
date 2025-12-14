@@ -11,7 +11,7 @@ total growing (or not) with each match.
 - future results are projected in a simple way, to give a general idea of what might happen next
 - lots of options to play around and see what works
 
-# TODO
+## TODO
 
 Experiment with actually predicting match results based on each club's home and away results so
 far. This won't be very sophisticated, but hopefully good enough to give a sense of who has a
@@ -21,6 +21,6 @@ Keep improving the display:
 - indicate in the overall graph which results are projected
 - ways to focus the view on just recent results, or just a subset of clubs, etc.
 
-# Demo
+## Demo
 
-See it in action at [index.html][index.html].
+See it in action at [index.html](index.html).
