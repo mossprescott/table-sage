@@ -1,75 +1,85 @@
 module Sage.Football exposing (..)
 
+import Array exposing (Array)
 import Dict
-import Sage.Plot exposing (Data, Score, Team)
+import Sage.Plot exposing (Data, Goals, Match, Result(..), Score, Team, oddsFraction)
 
 
-
--- import Set exposing (Set)
-
-
-type alias Match =
-    { host : Team
-    , opponent : Team
-    , result : Result
-    }
-
-
-type Result
-    = Pending
-    | Final { host : Int, opponent : Int }
-
-
-pending : Team -> Team -> Match
+pending : Team -> Team -> Match (Maybe Goals)
 pending ht ot =
-    Match ht ot Pending
+    Match ht ot Nothing
 
 
-final : Team -> Int -> Int -> Team -> Match
+final : Team -> Int -> Int -> Team -> Match (Maybe Goals)
 final ht hs os ot =
-    Match ht ot (Final { host = hs, opponent = os })
+    Match ht ot (Just { host = hs, opponent = os })
 
 
-hostPoints : Result -> Maybe Int
-hostPoints result =
-    case result of
-        Pending ->
-            Nothing
+hostPoints : Goals -> Int
+hostPoints { host, opponent } =
+    if host > opponent then
+        3
 
-        Final { host, opponent } ->
-            Just <|
-                if host > opponent then
-                    3
+    else if host == opponent then
+        1
 
-                else if host == opponent then
-                    1
-
-                else
-                    0
+    else
+        0
 
 
-opponentPoints : Result -> Maybe Int
-opponentPoints result =
-    case result of
-        Pending ->
-            Nothing
+opponentPoints : Goals -> Int
+opponentPoints { host, opponent } =
+    hostPoints { host = opponent, opponent = host }
 
-        Final { host, opponent } ->
-            Just <|
-                if host > opponent then
-                    0
 
-                else if host == opponent then
-                    1
+joinGoals : Match (Maybe Goals) -> Maybe (Match Goals)
+joinGoals mg =
+    mg.result
+        |> Maybe.map
+            (\result ->
+                { host = mg.host, opponent = mg.opponent, result = result }
+            )
 
-                else
-                    3
+
+
+-- |Points to the given team, which might be either side (or neither)
+
+
+teamPoints : Team -> Match Result -> Float
+teamPoints team match =
+    case match.result of
+        Final goals ->
+            if team == match.host then
+                goals |> hostPoints |> toFloat
+
+            else if team == match.opponent then
+                goals |> opponentPoints |> toFloat
+
+            else
+                0
+
+        Projected odds ->
+            let
+                winFraction =
+                    if team == match.host then
+                        odds |> oddsFraction .win
+
+                    else if team == match.opponent then
+                        odds |> oddsFraction .lose
+
+                    else
+                        0
+
+                drawValue =
+                    odds |> oddsFraction .draw
+            in
+            3 * winFraction + drawValue
 
 
 type alias Day =
     { day : String
     , date : String
-    , matches : List Match
+    , matches : List (Match (Maybe Goals))
     }
 
 
@@ -83,13 +93,52 @@ type alias Season =
     List Round
 
 
+
 -- TODO: validate
+-- - sensible round numbers
 -- - 10 matches per round
 -- - every team plays every round
 -- - every team plays every other team once
 
-toScores : Season -> Data
-toScores season =
+
+type alias Predictor =
+    Team -> Team -> Result
+
+
+
+-- |Simple prediction: the host always wins
+
+
+predictHomeWins : Predictor
+predictHomeWins _ _ =
+    Projected { win = 1.0, draw = 0.0, lose = 0.0 }
+
+
+
+-- | Simple prediction: equally win, draw, or lose
+
+
+predictEvenOdds : Predictor
+predictEvenOdds _ _ =
+    Projected { win = 0.33, draw = 0.33, lose = 0.33 }
+
+
+applyPredictor : Predictor -> Match (Maybe Goals) -> Match Result
+applyPredictor predict { host, opponent, result } =
+    let
+        predicted =
+            case result of
+                Just goals ->
+                    Final goals
+
+                Nothing ->
+                    predict host opponent
+    in
+    Match host opponent predicted
+
+
+toScores : Predictor -> Season -> Data
+toScores predict season =
     let
         teams : List Team
         teams =
@@ -99,40 +148,67 @@ toScores season =
                 |> List.concatMap (\m -> [ m.host, m.opponent ])
                 |> uniqBy .name
 
-        -- TODO: sort?
-        points : Team -> Round -> Maybe Int
-        points team round =
-            round.matches
+        -- Find the (single) match of the round involving this team, on either side
+        match : Team -> Round -> Maybe (Match (Maybe Goals))
+        match team round =
+            round
+                |> .matches
                 |> List.concatMap .matches
                 |> List.filterMap
                     (\m ->
-                        if m.host == team then
-                            hostPoints m.result
-
-                        else if m.opponent == team then
-                            opponentPoints m.result
+                        if m.host == team || m.opponent == team then
+                            Just m
 
                         else
                             Nothing
                     )
                 |> List.head
 
+        -- TODO: sort?
+        -- points : Team -> Round -> Maybe Int
+        -- points team round =
+        --     round.matches
+        --         |> List.concatMap .matches
+        --         |> List.filterMap
+        --             (\m ->
+        --                 if m.host == team then
+        --                     m.result |> Maybe.map hostPoints
+        --                 else if m.opponent == team then
+        --                     m.result |> Maybe.map opponentPoints
+        --                 else
+        --                     Nothing
+        --             )
+        --         |> List.head
         -- FIXME: match exactly one result?
-        scores : Team -> List Score
+        scores : Team -> Array Score
         scores team =
             season
-                |> List.map (points team)
+                |> List.map (match team)
                 |> List.foldl
-                    (\pts ( prevTotal, res ) ->
-                        let
-                            total =
-                                prevTotal + toFloat (pts |> Maybe.withDefault 0)
-                        in
-                        ( total, Score total False :: res )
+                    (\mm ( prevTotal, res ) ->
+                        case mm of
+                            Nothing ->
+                                -- FIXME: an error state, but this shifts all subsequent matches
+                                ( prevTotal, res )
+
+                            Just m ->
+                                let
+                                    result : Match Result
+                                    result =
+                                        applyPredictor predict m
+
+                                    pts =
+                                        teamPoints team result
+
+                                    total =
+                                        prevTotal + pts
+                                in
+                                ( total, Score result total :: res )
                     )
-                    ( 0.0, [ Score 0 False ] )
+                    ( 0.0, [] )
                 |> Tuple.second
                 |> List.reverse
+                |> Array.fromList
     in
     teams
         |> List.map

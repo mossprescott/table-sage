@@ -1,11 +1,24 @@
-module Sage.Plot exposing (Data, Dot, Score, Style(..), Team, plot)
+module Sage.Plot exposing
+    ( Data
+    , Dot
+    , Goals
+    , Match
+    , Result(..)
+    , Score
+    , Style(..)
+    , Team
+    , plot
+    , oddsFraction
+    )
 
-import Array
+import Array exposing (Array)
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
 import Chart.Item as CI
+import Chart.Svg exposing (Plane)
 import Html exposing (Html)
+import Html.Attributes as HA
 import List
 
 
@@ -17,18 +30,48 @@ type alias Team =
     }
 
 
-{-| A single score value, representing total accumulated points, actual or projected.
--}
-type alias Score =
-    { value : Float
-    , projected : Bool
-
-    -- TODO: other info to show in the tooltip?
+type alias Match result =
+    { host : Team
+    , opponent : Team
+    , result : result
     }
 
 
+type alias Goals =
+    { host : Int
+    , opponent : Int
+    }
+
+
+type alias Odds =
+    { win : Float, draw : Float, lose : Float }
+
+
+-- |One of the fields from an Odds, normalized so that the three values add to 1.0.
+oddsFraction : (Odds -> Float) -> Odds -> Float
+oddsFraction field odds =
+    (field odds)/(odds.win + odds.draw + odds.lose)
+
+
+type Result
+    = Final Goals
+    | Projected Odds
+
+
+{-| A single score value, representing total accumulated points, actual or projected.
+-}
+type alias Score =
+    { match : Match Result
+    , total : Float
+    }
+
+
+
+-- |A series of results and total scores for each team
+
+
 type alias Data =
-    List ( Team, List Score )
+    List ( Team, Array Score )
 
 
 {-| Type of a single point on the plot.
@@ -36,6 +79,10 @@ TODO: embed info about match results so it can be shown in the tooltip
 -}
 type alias Dot =
     CI.One ( Int, Team ) CI.Dot
+
+
+type alias Element msg =
+    C.Element ( Int, Team ) msg
 
 
 type Style
@@ -46,14 +93,14 @@ type Style
 plot : (List Dot -> msg) -> Style -> Data -> List Dot -> Html msg
 plot onHover style data hovering =
     let
-        toY : List Score -> Int -> Maybe Float
+        toY : Array Score -> Int -> Maybe Float
         toY scores round =
-            Array.fromList scores
+            scores
                 |> Array.get round
                 -- TODO: (-) round if style == Flatter
-                |> Maybe.map .value
+                |> Maybe.map .total
 
-        rounds : Team -> List Score -> C.Element ( Int, Team ) msg
+        rounds : Team -> Array Score -> Element msg
         rounds team scores =
             List.range 0 19
                 |> List.map (\r -> ( r, team ))
@@ -61,6 +108,7 @@ plot onHover style data hovering =
                     [ C.interpolatedMaybe
                         (Tuple.first >> toY scores)
                         [ CA.color team.color
+                        , CA.dashed [ 1, 2 ]
                         ]
                         [ CA.circle
                         , CA.size 1
@@ -69,8 +117,76 @@ plot onHover style data hovering =
                         |> C.named team.name
                     ]
 
+        -- Subset of teams' data to display
         displayed =
             data
+
+        styledName team =
+            Html.span
+                [ HA.style "color" team.color ]
+                [ Html.text team.name
+                ]
+
+        tooltip : Plane -> Dot -> List (Element msg)
+        tooltip _ item =
+            let
+                ( round, team ) =
+                    CI.getData item
+
+                score : Maybe Score
+                score =
+                    data
+                        |> List.filterMap
+                            (\( t, r ) ->
+                                if t == team then
+                                    Just r
+
+                                else
+                                    Nothing
+                            )
+                        |> List.head
+                        |> Maybe.andThen (Array.get round)
+
+                scoreView : Score -> List (Html Never)
+                scoreView s =
+                    [ styledName s.match.host
+                    , Html.span [] <|
+                        case s.match.result of
+                            Final goals ->
+                                [ Html.text
+                                    (" "
+                                        ++ String.fromInt goals.host
+                                        ++ " – "
+                                        ++ String.fromInt goals.opponent
+                                        ++ " "
+                                    )
+                                ]
+
+                            Projected odds ->
+                                let total = odds.win + odds.draw + odds.lose
+                                in [ Html.text
+                                    (" "
+                                        ++ String.fromInt (truncate (100*odds.win/total))
+                                        ++ "% "
+                                        ++ String.fromInt (truncate (100*odds.draw/total))
+                                        ++ "% "
+                                        ++ String.fromInt (truncate (100*odds.lose/total))
+                                        ++ "% "
+                                    )
+                                ]
+                    , styledName s.match.opponent
+
+                    -- , Html.text <| Debug.toString score
+                    ]
+            in
+            [ C.tooltip item
+                []
+                []
+                (score
+                    |> Maybe.map scoreView
+                    |> Maybe.withDefault []
+                )
+            ]
     in
     C.chart
         [ CA.height 300
@@ -87,14 +203,7 @@ plot onHover style data hovering =
         , C.yLabels [ CA.withGrid, CA.fontSize 12 ]
         ]
             ++ List.map (\( t, ss ) -> rounds t ss) displayed
-            ++ [ C.each hovering <|
-                    \p item ->
-                        [ C.tooltip item
-                            []
-                            []
-                            [--Html.text <| Debug.toString <| CI.getCenter p item
-                            ]
-                        ]
+            ++ [ C.each hovering tooltip
                , C.legendsAt .max
                     .max
                     [ CA.column

@@ -10,6 +10,7 @@ import Html exposing (Html)
 import Sage.EPL2025 as EPL2025
 import Sage.Football exposing (toScores)
 import Sage.Plot exposing (Dot, Style(..), plot)
+import Sage.Football exposing (predictHomeWins)
 
 
 main : Program () Model Msg
@@ -57,7 +58,7 @@ view model =
                 ]
               <|
                 Element.html <|
-                    plot OnHover Simple (toScores EPL2025.matches) model.hovering
+                    plot OnHover Simple (toScores predictHomeWins EPL2025.matches) model.hovering
 
             -- , column []
             --     (toScores EPL2025.matches |> List.map (Debug.toString >> text))
