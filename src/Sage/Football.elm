@@ -101,30 +101,13 @@ type alias Season =
 -- - every team plays every other team once
 
 
-type alias Predictor =
-    Team -> Team -> Result
-
-
-
--- |Simple prediction: the host always wins
-
-
-predictHomeWins : Predictor
-predictHomeWins _ _ =
-    Projected { win = 1.0, draw = 0.0, lose = 0.0 }
-
-
-
--- | Simple prediction: equally win, draw, or lose
-
-
-predictEvenOdds : Predictor
-predictEvenOdds _ _ =
-    Projected { win = 0.33, draw = 0.33, lose = 0.33 }
+type Predictor
+    = PredictHostWins
+    | PredictEvenOdds
 
 
 applyPredictor : Predictor -> Match (Maybe Goals) -> Match Result
-applyPredictor predict { host, opponent, result } =
+applyPredictor predictor { host, opponent, result } =
     let
         predicted =
             case result of
@@ -132,7 +115,12 @@ applyPredictor predict { host, opponent, result } =
                     Final goals
 
                 Nothing ->
-                    predict host opponent
+                    case predictor of
+                        PredictHostWins ->
+                            Projected { win = 1.0, draw = 0.0, lose = 0.0 }
+
+                        PredictEvenOdds ->
+                            Projected { win = 0.33, draw = 0.33, lose = 0.33 }
     in
     Match host opponent predicted
 
@@ -164,22 +152,6 @@ toScores predict season =
                     )
                 |> List.head
 
-        -- TODO: sort?
-        -- points : Team -> Round -> Maybe Int
-        -- points team round =
-        --     round.matches
-        --         |> List.concatMap .matches
-        --         |> List.filterMap
-        --             (\m ->
-        --                 if m.host == team then
-        --                     m.result |> Maybe.map hostPoints
-        --                 else if m.opponent == team then
-        --                     m.result |> Maybe.map opponentPoints
-        --                 else
-        --                     Nothing
-        --             )
-        --         |> List.head
-        -- FIXME: match exactly one result?
         scores : Team -> Array Score
         scores team =
             season
