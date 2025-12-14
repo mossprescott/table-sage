@@ -411,21 +411,80 @@ matches =
     , Round 16
         [ Day "Saturday"
             "2025-12-13"
-            [ pending che eve
-            , pending liv bha
-            , pending bur ful
-            , pending ars wol
+            [ final che 2 0 eve
+            , final liv 2 0 bha
+            , final bur 2 3 ful
+            , final ars 2 1 wol
             ]
         , Day "Sunday"
             "2025-12-14"
-            [ pending cry mci
-            , pending nfo tot
-            , pending sun new
-            , pending whu avl
+            [ final cry 0 3 mci
+            , final nfo 3 0 tot
+            , final sun 1 0 new
+            , final whu 2 3 avl
             , pending bre lee
             ]
         , Day "Monday"
             "2025-12-15"
             [ pending mun bou ]
+        ]
+    , Round 17
+        [ Day "Saturday"
+            "2025-12-20"
+            [ pending new che
+            , pending bou bur
+            , pending bha sun
+            , pending mci whu
+            , pending wol bre
+            , pending tot liv
+            , pending eve ars
+            , pending lee cry
+            ]
+        , Day "Sunday"
+            "2025-12-21"
+            [ pending avl mun
+            ]
+        , Day "Monday"
+            "2025-12-22"
+            [ pending ful nfo ]
+        ]
+    , Round 18
+        [ Day "Friday"
+            "2025-12-26"
+            [ pending mun che
+            ]
+        , Day "Saturday"
+            "2025-12-27"
+            [ pending nfo mci
+            , pending ars bha
+            , pending bre bou
+            , pending bur eve
+            , pending liv wol
+            , pending whu ful
+            , pending che avl
+            ]
+        , Day "Sunday"
+            "2025-12-28"
+            [ pending sun lee
+            , pending cry tot
+            ]
+        ]
+    , Round 19
+        [ Day "Tuesday"
+            "2025-12-30"
+            [ pending bur new
+            , pending che bou
+            , pending nfo eve
+            , pending whu bha
+            , pending ars avl
+            , pending mun wol
+            ]
+        , Day "Thursday"
+            "2026-01-01"
+            [ pending cry ful
+            , pending liv lee
+            , pending bre tot
+            , pending sun mci
+            ]
         ]
     ]
