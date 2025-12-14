@@ -3,14 +3,15 @@ module App exposing (..)
 -- import Element.Background as Background
 -- import Element.Border as Border
 
+import Array
 import Browser
-import Element exposing (column, el, text, spacing)
+import Element exposing (column, el, spacing, text)
 import Element.Font as Font
 import Element.Input exposing (checkbox, defaultCheckbox, labelRight)
 import Html exposing (Html)
 import Sage.EPL2025 as EPL2025
 import Sage.Football exposing (Predictor(..), toScores)
-import Sage.Plot exposing (Dot, Style(..), plot)
+import Sage.Plot exposing (Dot, Result(..), Style(..), plot)
 
 
 main : Program () Model Msg
@@ -24,20 +25,20 @@ main =
 
 type alias Model =
     { hovering : List Dot
-    , predictor : Predictor
+    , predictor : Maybe Predictor
     }
 
 
 init : Model
 init =
     { hovering = []
-    , predictor = PredictHostWins
+    , predictor = Nothing
     }
 
 
 type Msg
     = OnHover (List Dot)
-    | SelectPredictor Predictor
+    | SelectPredictor (Maybe Predictor)
 
 
 update : Msg -> Model -> Model
@@ -52,6 +53,32 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
+    let
+        scores =
+            case model.predictor of
+                Nothing ->
+                    EPL2025.matches
+                        |> toScores PredictEvenOdds
+                        |> List.map
+                            (\( t, rs ) ->
+                                ( t
+                                , rs
+                                    |> Array.filter
+                                        (\s ->
+                                            case s.match.result of
+                                                Final _ ->
+                                                    True
+
+                                                Projected _ ->
+                                                    False
+                                        )
+                                )
+                            )
+
+                Just predictor ->
+                    EPL2025.matches
+                        |> toScores predictor
+    in
     Element.layout [] <|
         column
             [ Element.padding 10
@@ -66,7 +93,7 @@ view model =
                 ]
               <|
                 Element.html <|
-                    plot OnHover Simple (toScores model.predictor EPL2025.matches) model.hovering
+                    plot OnHover Simple scores model.hovering
 
             -- , column []
             --     (toScores EPL2025.matches |> List.map (Debug.toString >> text))
@@ -79,17 +106,24 @@ view model =
                 [ Font.size 12
                 , spacing 10
                 ]
-                [ checkbox []
-                    { onChange = always (SelectPredictor PredictHostWins)
+                [ text "Prediction"
+                , checkbox []
+                    { onChange = always (SelectPredictor (Just PredictHostWins))
                     , icon = defaultCheckbox
-                    , checked = model.predictor == PredictHostWins
-                    , label = labelRight [] (text "Predict Host Wins")
+                    , checked = model.predictor == Just PredictHostWins
+                    , label = labelRight [] (text "Host Wins")
                     }
                 , checkbox []
-                    { onChange = always (SelectPredictor PredictEvenOdds)
+                    { onChange = always (SelectPredictor (Just PredictEvenOdds))
                     , icon = defaultCheckbox
-                    , checked = model.predictor == PredictEvenOdds
-                    , label = labelRight [] (text "Predict Even Odds")
+                    , checked = model.predictor == Just PredictEvenOdds
+                    , label = labelRight [] (text "Even Odds")
+                    }
+                , checkbox []
+                    { onChange = always (SelectPredictor Nothing)
+                    , icon = defaultCheckbox
+                    , checked = model.predictor == Nothing
+                    , label = labelRight [] (text "None")
                     }
                 ]
             ]
