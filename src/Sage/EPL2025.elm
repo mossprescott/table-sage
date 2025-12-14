@@ -422,7 +422,7 @@ matches =
             , final nfo 3 0 tot
             , final sun 1 0 new
             , final whu 2 3 avl
-            , pending bre lee
+            , final bre 1 1 lee
             ]
         , Day "Monday"
             "2025-12-15"
