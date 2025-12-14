@@ -5,7 +5,7 @@ module App exposing (..)
 
 import Array
 import Browser
-import Element exposing (column, el, spacing, text)
+import Element exposing (alignTop, column, el, row, spacing, text)
 import Element.Font as Font
 import Element.Input exposing (checkbox, defaultCheckbox, labelRight)
 import Html exposing (Html)
@@ -26,6 +26,7 @@ main =
 type alias Model =
     { hovering : List Dot
     , predictor : Maybe Predictor
+    , style : Style
     }
 
 
@@ -33,12 +34,14 @@ init : Model
 init =
     { hovering = []
     , predictor = Nothing
+    , style = Simple
     }
 
 
 type Msg
     = OnHover (List Dot)
     | SelectPredictor (Maybe Predictor)
+    | SelectStyle Style
 
 
 update : Msg -> Model -> Model
@@ -49,6 +52,9 @@ update msg model =
 
         SelectPredictor predictor ->
             { model | predictor = predictor }
+
+        SelectStyle style ->
+            { model | style = style }
 
 
 view : Model -> Html Msg
@@ -93,7 +99,7 @@ view model =
                 ]
               <|
                 Element.html <|
-                    plot OnHover Simple scores model.hovering
+                    plot OnHover model.style scores model.hovering
 
             -- , column []
             --     (toScores EPL2025.matches |> List.map (Debug.toString >> text))
@@ -102,28 +108,54 @@ view model =
             --     , Font.size 8
             --     ]
             --     (model.hovering |> List.map (Debug.toString >> Debug.log "" >> text))
-            , column
+            , row
                 [ Font.size 12
-                , spacing 10
+                , spacing 20
                 ]
-                [ text "Prediction"
-                , checkbox []
-                    { onChange = always (SelectPredictor (Just PredictHostWins))
-                    , icon = defaultCheckbox
-                    , checked = model.predictor == Just PredictHostWins
-                    , label = labelRight [] (text "Host Wins")
-                    }
-                , checkbox []
-                    { onChange = always (SelectPredictor (Just PredictEvenOdds))
-                    , icon = defaultCheckbox
-                    , checked = model.predictor == Just PredictEvenOdds
-                    , label = labelRight [] (text "Even Odds")
-                    }
-                , checkbox []
-                    { onChange = always (SelectPredictor Nothing)
-                    , icon = defaultCheckbox
-                    , checked = model.predictor == Nothing
-                    , label = labelRight [] (text "None")
-                    }
+                [ column
+                    [ spacing 10
+                    , alignTop
+                    ]
+                    [ text "Prediction"
+                    , checkbox []
+                        { onChange = always (SelectPredictor (Just PredictHostWins))
+                        , icon = defaultCheckbox
+                        , checked = model.predictor == Just PredictHostWins
+                        , label = labelRight [] (text "Host Wins")
+                        }
+                    , checkbox []
+                        { onChange = always (SelectPredictor (Just PredictEvenOdds))
+                        , icon = defaultCheckbox
+                        , checked = model.predictor == Just PredictEvenOdds
+                        , label = labelRight [] (text "Even Odds")
+                        }
+                    , checkbox []
+                        { onChange = always (SelectPredictor Nothing)
+                        , icon = defaultCheckbox
+                        , checked = model.predictor == Nothing
+                        , label = labelRight [] (text "None")
+                        }
+                    ]
+                , column
+                    [ spacing 10
+                    , alignTop
+                    ]
+                    [ text "Style"
+                    , checkbox []
+                        { onChange =
+                            always
+                                (SelectStyle
+                                    (if model.style == Flatter then
+                                        Simple
+
+                                     else
+                                        Flatter
+                                    )
+                                )
+                        , icon = defaultCheckbox
+                        , checked = model.style == Flatter
+                        , label = labelRight [] (text "Flatter")
+                        }
+                    ]
                 ]
             ]

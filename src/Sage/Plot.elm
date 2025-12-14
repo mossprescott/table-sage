@@ -102,8 +102,14 @@ plot onHover style data hovering =
         toY scores round =
             scores
                 |> Array.get (round - 1)
-                -- TODO: (-) round if style == Flatter
-                |> Maybe.map .total
+                |> Maybe.map
+                    (\s ->
+                        if style == Flatter then
+                            s.total - toFloat round
+
+                        else
+                            s.total
+                    )
 
         rounds : Team -> Array Score -> Element msg
         rounds team scores =
@@ -212,7 +218,8 @@ plot onHover style data hovering =
         ]
     <|
         [ C.xLabels [ CA.withGrid, CA.fontSize 12 ]
-        , C.yLabels [ CA.withGrid, CA.fontSize 12 ]
+
+        -- , C.yLabels [ CA.withGrid, CA.fontSize 12 ]
         ]
             ++ List.map (\( t, ss ) -> rounds t ss) displayed
             ++ [ C.each hovering tooltip
