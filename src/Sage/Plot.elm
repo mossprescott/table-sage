@@ -7,8 +7,8 @@ module Sage.Plot exposing
     , Score
     , Style(..)
     , Team
-    , plot
     , oddsFraction
+    , plot
     )
 
 import Array exposing (Array)
@@ -47,10 +47,13 @@ type alias Odds =
     { win : Float, draw : Float, lose : Float }
 
 
+
 -- |One of the fields from an Odds, normalized so that the three values add to 1.0.
+
+
 oddsFraction : (Odds -> Float) -> Odds -> Float
 oddsFraction field odds =
-    (field odds)/(odds.win + odds.draw + odds.lose)
+    field odds / (odds.win + odds.draw + odds.lose)
 
 
 type Result
@@ -96,13 +99,13 @@ plot onHover style data hovering =
         toY : Array Score -> Int -> Maybe Float
         toY scores round =
             scores
-                |> Array.get round
+                |> Array.get (round - 1)
                 -- TODO: (-) round if style == Flatter
                 |> Maybe.map .total
 
         rounds : Team -> Array Score -> Element msg
         rounds team scores =
-            List.range 0 19
+            List.range 1 19
                 |> List.map (\r -> ( r, team ))
                 |> C.series (Tuple.first >> toFloat)
                     [ C.interpolatedMaybe
@@ -145,7 +148,7 @@ plot onHover style data hovering =
                                     Nothing
                             )
                         |> List.head
-                        |> Maybe.andThen (Array.get round)
+                        |> Maybe.andThen (Array.get (round - 1))
 
                 scoreView : Score -> List (Html Never)
                 scoreView s =
@@ -163,14 +166,17 @@ plot onHover style data hovering =
                                 ]
 
                             Projected odds ->
-                                let total = odds.win + odds.draw + odds.lose
-                                in [ Html.text
+                                let
+                                    total =
+                                        odds.win + odds.draw + odds.lose
+                                in
+                                [ Html.text
                                     (" "
-                                        ++ String.fromInt (truncate (100*odds.win/total))
+                                        ++ String.fromInt (truncate (100 * odds.win / total))
                                         ++ "% "
-                                        ++ String.fromInt (truncate (100*odds.draw/total))
+                                        ++ String.fromInt (truncate (100 * odds.draw / total))
                                         ++ "% "
-                                        ++ String.fromInt (truncate (100*odds.lose/total))
+                                        ++ String.fromInt (truncate (100 * odds.lose / total))
                                         ++ "% "
                                     )
                                 ]
