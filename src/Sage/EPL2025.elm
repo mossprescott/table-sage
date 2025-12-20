@@ -451,7 +451,7 @@ matches =
     , Round 18
         [ Day "Friday"
             "2025-12-26"
-            [ pending mun che
+            [ pending mun new
             ]
         , Day "Saturday"
             "2025-12-27"
