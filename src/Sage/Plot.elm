@@ -321,7 +321,11 @@ plot onHover { style, minRound, maxRound } width height data hovering =
                         Just scores ->
                             let
                                 lastVisibleRound =
-                                    maxRound |> Maybe.withDefault (Array.length scores)
+                                    Array.length scores
+                                        |> (maxRound
+                                                |> Maybe.map (\m -> min m)
+                                                |> Maybe.withDefault identity
+                                           )
                             in
                             round == lastVisibleRound
 
