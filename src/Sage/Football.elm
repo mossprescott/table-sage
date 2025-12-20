@@ -184,12 +184,12 @@ toScores predict season =
             let
                 -- indexedMap, but for nested lists, with a pair of indices, and also
                 -- flattening the lists
-                indexedConcatMap : ((Int, Int) -> a -> b) -> List (List a) -> List b
+                indexedConcatMap : (( Int, Int ) -> a -> b) -> List (List a) -> List b
                 indexedConcatMap f =
                     List.indexedMap Tuple.pair
                         >> List.concatMap
                             (\( ai, xs ) ->
-                                List.indexedMap (\bi x -> ( f ( ai, bi ) x )) xs
+                                List.indexedMap (\bi x -> f ( ai, bi ) x) xs
                             )
             in
             round
