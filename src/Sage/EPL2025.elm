@@ -431,14 +431,14 @@ matches =
     , Round 17
         [ Day "Saturday"
             "2025-12-20"
-            [ pending new che
-            , pending bou bur
-            , pending bha sun
-            , pending mci whu
-            , pending wol bre
-            , pending tot liv
-            , pending eve ars
-            , pending lee cry
+            [ final new 2 2 che
+            , final bou 1 1 bur
+            , final bha 0 0 sun
+            , final mci 3 0 whu
+            , final wol 0 2 bre
+            , final tot 1 2 liv
+            , final eve 0 1 ars
+            , final lee 4 1 cry
             ]
         , Day "Sunday"
             "2025-12-21"

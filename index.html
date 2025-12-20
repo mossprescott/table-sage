@@ -5056,9 +5056,19 @@ var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
 var $elm$core$Basics$False = {$: 'False'};
-var $elm$core$Maybe$Nothing = {$: 'Nothing'};
+var $elm$core$Maybe$Just = function (a) {
+	return {$: 'Just', a: a};
+};
+var $author$project$Sage$Football$PredictEvenOdds = {$: 'PredictEvenOdds'};
 var $author$project$Sage$Plot$Simple = {$: 'Simple'};
-var $author$project$App$init = {hovering: _List_Nil, predictor: $elm$core$Maybe$Nothing, style: $author$project$Sage$Plot$Simple, taller: false};
+var $elm$core$Basics$True = {$: 'True'};
+var $author$project$App$init = {
+	hovering: _List_Nil,
+	predictor: $elm$core$Maybe$Just($author$project$Sage$Football$PredictEvenOdds),
+	recentOnly: true,
+	style: $author$project$Sage$Plot$Simple,
+	taller: false
+};
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -5081,9 +5091,7 @@ var $elm$json$Json$Decode$OneOf = function (a) {
 	return {$: 'OneOf', a: a};
 };
 var $elm$core$Basics$add = _Basics_add;
-var $elm$core$Maybe$Just = function (a) {
-	return {$: 'Just', a: a};
-};
+var $elm$core$Maybe$Nothing = {$: 'Nothing'};
 var $elm$core$String$all = _String_all;
 var $elm$core$Basics$and = _Basics_and;
 var $elm$core$Basics$append = _Utils_append;
@@ -5444,7 +5452,6 @@ var $elm$core$Array$initialize = F2(
 			return A5($elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
 		}
 	});
-var $elm$core$Basics$True = {$: 'True'};
 var $elm$core$Result$isOk = function (result) {
 	if (result.$ === 'Ok') {
 		return true;
@@ -10615,17 +10622,21 @@ var $author$project$App$update = F2(
 				return _Utils_update(
 					model,
 					{style: style});
-			default:
+			case 'SelectTaller':
 				var taller = msg.a;
 				return _Utils_update(
 					model,
 					{taller: taller});
+			default:
+				var recentOnly = msg.a;
+				return _Utils_update(
+					model,
+					{recentOnly: recentOnly});
 		}
 	});
 var $author$project$App$OnHover = function (a) {
 	return {$: 'OnHover', a: a};
 };
-var $author$project$Sage$Football$PredictEvenOdds = {$: 'PredictEvenOdds'};
 var $mdgriffith$elm_ui$Internal$Model$Unkeyed = function (a) {
 	return {$: 'Unkeyed', a: a};
 };
@@ -16018,6 +16029,61 @@ var $mdgriffith$elm_ui$Element$column = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
+var $author$project$Sage$Football$flatMatches = A2(
+	$elm$core$Basics$composeR,
+	function ($) {
+		return $.matches;
+	},
+	$elm$core$List$concatMap(
+		function ($) {
+			return $.matches;
+		}));
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Sage$Football$currentRound = function (rounds) {
+	var roundsRev = $elm$core$List$reverse(rounds);
+	var lastRound = $elm$core$List$head(roundsRev);
+	var isPlayed = A2(
+		$elm$core$Basics$composeR,
+		function ($) {
+			return $.result;
+		},
+		A2(
+			$elm$core$Basics$composeR,
+			$elm$core$Maybe$map(
+				$elm$core$Basics$always(true)),
+			$elm$core$Maybe$withDefault(false)));
+	var lastWithPlayed = $elm$core$List$head(
+		A2(
+			$elm$core$List$filter,
+			A2(
+				$elm$core$Basics$composeR,
+				$author$project$Sage$Football$flatMatches,
+				$elm$core$List$any(isPlayed)),
+			roundsRev));
+	var _v0 = _Utils_Tuple2(lastWithPlayed, lastRound);
+	if (_v0.a.$ === 'Just') {
+		var lwp = _v0.a.a;
+		return lwp.number;
+	} else {
+		if (_v0.b.$ === 'Just') {
+			var _v1 = _v0.a;
+			var l = _v0.b.a;
+			return l.number;
+		} else {
+			var _v2 = _v0.a;
+			var _v3 = _v0.b;
+			return 1;
+		}
+	}
+};
 var $mdgriffith$elm_ui$Element$el = F2(
 	function (attrs, child) {
 		return A4(
@@ -16938,7 +17004,7 @@ var $author$project$Sage$EPL2025$matches = _List_fromArray(
 				'2025-12-15',
 				_List_fromArray(
 					[
-						A2($author$project$Sage$Football$pending, $author$project$Sage$EPL2025$mun, $author$project$Sage$EPL2025$bou)
+						A4($author$project$Sage$Football$final, $author$project$Sage$EPL2025$mun, 4, 4, $author$project$Sage$EPL2025$bou)
 					]))
 			])),
 		A2(
@@ -16952,14 +17018,14 @@ var $author$project$Sage$EPL2025$matches = _List_fromArray(
 				'2025-12-20',
 				_List_fromArray(
 					[
-						A2($author$project$Sage$Football$pending, $author$project$Sage$EPL2025$new, $author$project$Sage$EPL2025$che),
-						A2($author$project$Sage$Football$pending, $author$project$Sage$EPL2025$bou, $author$project$Sage$EPL2025$bur),
-						A2($author$project$Sage$Football$pending, $author$project$Sage$EPL2025$bha, $author$project$Sage$EPL2025$sun),
-						A2($author$project$Sage$Football$pending, $author$project$Sage$EPL2025$mci, $author$project$Sage$EPL2025$whu),
-						A2($author$project$Sage$Football$pending, $author$project$Sage$EPL2025$wol, $author$project$Sage$EPL2025$bre),
-						A2($author$project$Sage$Football$pending, $author$project$Sage$EPL2025$tot, $author$project$Sage$EPL2025$liv),
-						A2($author$project$Sage$Football$pending, $author$project$Sage$EPL2025$eve, $author$project$Sage$EPL2025$ars),
-						A2($author$project$Sage$Football$pending, $author$project$Sage$EPL2025$lee, $author$project$Sage$EPL2025$cry)
+						A4($author$project$Sage$Football$final, $author$project$Sage$EPL2025$new, 2, 2, $author$project$Sage$EPL2025$che),
+						A4($author$project$Sage$Football$final, $author$project$Sage$EPL2025$bou, 1, 1, $author$project$Sage$EPL2025$bur),
+						A4($author$project$Sage$Football$final, $author$project$Sage$EPL2025$bha, 0, 0, $author$project$Sage$EPL2025$sun),
+						A4($author$project$Sage$Football$final, $author$project$Sage$EPL2025$mci, 3, 0, $author$project$Sage$EPL2025$whu),
+						A4($author$project$Sage$Football$final, $author$project$Sage$EPL2025$wol, 0, 2, $author$project$Sage$EPL2025$bre),
+						A4($author$project$Sage$Football$final, $author$project$Sage$EPL2025$tot, 1, 2, $author$project$Sage$EPL2025$liv),
+						A4($author$project$Sage$Football$final, $author$project$Sage$EPL2025$eve, 0, 1, $author$project$Sage$EPL2025$ars),
+						A4($author$project$Sage$Football$final, $author$project$Sage$EPL2025$lee, 4, 1, $author$project$Sage$EPL2025$cry)
 					])),
 				A3(
 				$author$project$Sage$Football$Day,
@@ -16989,7 +17055,7 @@ var $author$project$Sage$EPL2025$matches = _List_fromArray(
 				'2025-12-26',
 				_List_fromArray(
 					[
-						A2($author$project$Sage$Football$pending, $author$project$Sage$EPL2025$mun, $author$project$Sage$EPL2025$che)
+						A2($author$project$Sage$Football$pending, $author$project$Sage$EPL2025$mun, $author$project$Sage$EPL2025$new)
 					])),
 				A3(
 				$author$project$Sage$Football$Day,
@@ -17050,6 +17116,9 @@ var $author$project$Sage$Plot$Flatter = {$: 'Flatter'};
 var $author$project$Sage$Football$PredictHostWins = {$: 'PredictHostWins'};
 var $author$project$App$SelectPredictor = function (a) {
 	return {$: 'SelectPredictor', a: a};
+};
+var $author$project$App$SelectRecentOnly = function (a) {
+	return {$: 'SelectRecentOnly', a: a};
 };
 var $author$project$App$SelectStyle = function (a) {
 	return {$: 'SelectStyle', a: a};
@@ -17705,6 +17774,19 @@ var $author$project$App$optionsView = function (model) {
 								$mdgriffith$elm_ui$Element$text('Taller')),
 							onChange: $elm$core$Basics$always(
 								$author$project$App$SelectTaller(!model.taller))
+						}),
+						A2(
+						$mdgriffith$elm_ui$Element$Input$checkbox,
+						_List_Nil,
+						{
+							checked: model.recentOnly,
+							icon: $mdgriffith$elm_ui$Element$Input$defaultCheckbox,
+							label: A2(
+								$mdgriffith$elm_ui$Element$Input$labelRight,
+								_List_Nil,
+								$mdgriffith$elm_ui$Element$text('Recent Matches Only')),
+							onChange: $elm$core$Basics$always(
+								$author$project$App$SelectRecentOnly(!model.recentOnly))
 						})
 					]))
 			]));
@@ -17729,7 +17811,22 @@ var $terezka$elm_charts$Chart$Attributes$background = function (v) {
 				{background: v});
 		});
 };
-var $elm$html$Html$br = _VirtualDom_node('br');
+var $terezka$elm_charts$Chart$Attributes$border = function (v) {
+	return $terezka$elm_charts$Internal$Helpers$Attribute(
+		function (config) {
+			return _Utils_update(
+				config,
+				{border: v});
+		});
+};
+var $terezka$elm_charts$Chart$Attributes$borderWidth = function (v) {
+	return $terezka$elm_charts$Internal$Helpers$Attribute(
+		function (config) {
+			return _Utils_update(
+				config,
+				{borderWidth: v});
+		});
+};
 var $terezka$elm_charts$Internal$Svg$Event = F2(
 	function (name, handler) {
 		return {handler: handler, name: name};
@@ -20078,15 +20175,6 @@ var $cuducos$elm_format_number$FormatNumber$Parser$getDecimals = F2(
 				return A2($cuducos$elm_format_number$FormatNumber$Parser$addZerosToFit, min, digits);
 		}
 	});
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
 var $elm$core$String$foldr = _String_foldr;
 var $elm$core$String$toList = function (string) {
 	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);
@@ -20702,6 +20790,10 @@ var $terezka$elm_charts$Chart$Attributes$onRight = $terezka$elm_charts$Internal$
 				direction: $elm$core$Maybe$Just($terezka$elm_charts$Internal$Svg$Right)
 			});
 	});
+var $terezka$elm_charts$Chart$Attributes$orHigher = F3(
+	function (most, real, _v0) {
+		return (_Utils_cmp(real, most) < 0) ? most : real;
+	});
 var $terezka$elm_charts$Chart$Attributes$padding = function (value) {
 	return $terezka$elm_charts$Internal$Helpers$Attribute(
 		function (config) {
@@ -20751,6 +20843,80 @@ var $terezka$elm_charts$Chart$Attributes$range = function (v) {
 				{range: v});
 		});
 };
+var $elm$html$Html$br = _VirtualDom_node('br');
+var $author$project$Sage$Plot$styledTeam = F2(
+	function (field, team) {
+		return A2(
+			$elm$html$Html$span,
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'color', team.color)
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text(
+					field(team))
+				]));
+	});
+var $elm$core$Basics$truncate = _Basics_truncate;
+var $author$project$Sage$Plot$scoreView = F3(
+	function (round, team, s) {
+		return _List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$span,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$author$project$Sage$Plot$styledTeam,
+								function ($) {
+									return $.name;
+								},
+								team),
+								$elm$html$Html$text(
+								': ' + (A2($cuducos$elm_format_number$FormatNumber$format, $author$project$Sage$Plot$pointsLocale, s.total) + (' after ' + ($elm$core$String$fromInt(round) + ' rounds'))))
+							])),
+						A2($elm$html$Html$br, _List_Nil, _List_Nil),
+						A2(
+						$author$project$Sage$Plot$styledTeam,
+						function ($) {
+							return $.shortName;
+						},
+						s.match.host),
+						A2(
+						$elm$html$Html$span,
+						_List_Nil,
+						_List_fromArray(
+							[
+								function () {
+								var _v0 = s.match.result;
+								if (_v0.$ === 'Final') {
+									var goals = _v0.a;
+									return $elm$html$Html$text(
+										' ' + ($elm$core$String$fromInt(goals.host) + (' – ' + ($elm$core$String$fromInt(goals.opponent) + ' '))));
+								} else {
+									var odds = _v0.a;
+									var total = (odds.win + odds.draw) + odds.lose;
+									return $elm$html$Html$text(
+										' ' + ($elm$core$String$fromInt(((100 * odds.win) / total) | 0) + ('% ' + ($elm$core$String$fromInt(((100 * odds.draw) / total) | 0) + ('% ' + ($elm$core$String$fromInt(((100 * odds.lose) / total) | 0) + '% '))))));
+								}
+							}()
+							])),
+						A2(
+						$author$project$Sage$Plot$styledTeam,
+						function ($) {
+							return $.shortName;
+						},
+						s.match.opponent)
+					]))
+			]);
+	});
 var $author$project$Sage$Plot$scoresForTeam = F2(
 	function (team, data) {
 		return $elm$core$List$head(
@@ -20806,14 +20972,6 @@ var $terezka$elm_charts$Internal$Legend$LineLegend = F3(
 	function (a, b, c) {
 		return {$: 'LineLegend', a: a, b: b, c: c};
 	});
-var $terezka$elm_charts$Chart$Attributes$border = function (v) {
-	return $terezka$elm_charts$Internal$Helpers$Attribute(
-		function (config) {
-			return _Utils_update(
-				config,
-				{border: v});
-		});
-};
 var $terezka$elm_charts$Internal$Svg$defaultInterpolation = {attrs: _List_Nil, color: $terezka$elm_charts$Internal$Helpers$pink, dashed: _List_Nil, design: $elm$core$Maybe$Nothing, method: $elm$core$Maybe$Nothing, opacity: 0, width: 1};
 var $terezka$elm_charts$Internal$Helpers$noChange = $terezka$elm_charts$Internal$Helpers$Attribute($elm$core$Basics$identity);
 var $terezka$elm_charts$Chart$Attributes$opacity = function (v) {
@@ -22299,7 +22457,37 @@ var $terezka$elm_charts$Chart$tooltip = F4(
 					content_) : $elm$html$Html$text('');
 			});
 	});
-var $elm$core$Basics$truncate = _Basics_truncate;
+var $terezka$elm_charts$Internal$Property$variation = F2(
+	function (newVariation, property) {
+		var update = function (config) {
+			return _Utils_update(
+				config,
+				{
+					variation: F2(
+						function (ids, datum) {
+							return _Utils_ap(
+								A2(config.variation, ids, datum),
+								A2(newVariation, ids, datum));
+						})
+				});
+		};
+		if (property.$ === 'NotStacked') {
+			var config = property.a;
+			return $terezka$elm_charts$Internal$Property$NotStacked(
+				update(config));
+		} else {
+			var configs = property.a;
+			return $terezka$elm_charts$Internal$Property$Stacked(
+				A2($elm$core$List$map, update, configs));
+		}
+	});
+var $terezka$elm_charts$Chart$variation = function (func) {
+	return $terezka$elm_charts$Internal$Property$variation(
+		F2(
+			function (ids, datum) {
+				return A2(func, ids.dataIndex, datum);
+			}));
+};
 var $terezka$elm_charts$Chart$Attributes$withGrid = $terezka$elm_charts$Internal$Helpers$Attribute(
 	function (config) {
 		return _Utils_update(
@@ -24790,102 +24978,49 @@ var $terezka$elm_charts$Chart$xLabels = function (edits) {
 			}));
 };
 var $author$project$Sage$Plot$plot = F6(
-	function (onHover, style, width, height, data, hovering) {
+	function (onHover, options, width, height, data, hovering) {
 		var toY = F2(
 			function (scores, round) {
 				return A2(
 					$elm$core$Maybe$map,
 					function (s) {
-						return _Utils_eq(style, $author$project$Sage$Plot$Flatter) ? (s.total - round) : s.total;
+						return _Utils_eq(options.style, $author$project$Sage$Plot$Flatter) ? (s.total - round) : s.total;
 					},
 					A2($elm$core$Array$get, round - 1, scores));
 			});
-		var styledTeam = F2(
-			function (field, team) {
-				return A2(
-					$elm$html$Html$span,
-					_List_fromArray(
-						[
-							A2($elm$html$Html$Attributes$style, 'color', team.color)
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							field(team))
-						]));
-			});
-		var scoreForDot = function (_v11) {
-			var round = _v11.a;
-			var team = _v11.b;
+		var scoreForDot = function (_v15) {
+			var round = _v15.a;
+			var team = _v15.b;
 			return A2(
 				$elm$core$Maybe$andThen,
 				$elm$core$Array$get(round - 1),
 				A2($author$project$Sage$Plot$scoresForTeam, team, data));
 		};
+		var toX = function (_v14) {
+			var round = _v14.a;
+			var team = _v14.b;
+			var score = scoreForDot(
+				_Utils_Tuple2(round, team));
+			var _v13 = A2(
+				$elm$core$Maybe$withDefault,
+				_Utils_Tuple2(0, 0),
+				A2(
+					$elm$core$Maybe$map,
+					function ($) {
+						return $.schedule;
+					},
+					score));
+			var dayInRound = _v13.a;
+			var matchInDay = _v13.b;
+			return (round + (dayInRound * options.dayXOffset)) + (matchInDay * options.matchXOffset);
+		};
 		var tooltip = F2(
-			function (_v10, item) {
-				var _v8 = $terezka$elm_charts$Chart$Item$getData(item);
-				var round = _v8.a;
-				var team = _v8.b;
+			function (_v12, item) {
+				var _v11 = $terezka$elm_charts$Chart$Item$getData(item);
+				var round = _v11.a;
+				var team = _v11.b;
 				var score = scoreForDot(
 					_Utils_Tuple2(round, team));
-				var scoreView = function (s) {
-					return _List_fromArray(
-						[
-							A2(
-							$elm$html$Html$div,
-							_List_Nil,
-							_List_fromArray(
-								[
-									A2(
-									$elm$html$Html$span,
-									_List_Nil,
-									_List_fromArray(
-										[
-											A2(
-											styledTeam,
-											function ($) {
-												return $.name;
-											},
-											team),
-											$elm$html$Html$text(
-											': ' + (A2($cuducos$elm_format_number$FormatNumber$format, $author$project$Sage$Plot$pointsLocale, s.total) + (' after ' + ($elm$core$String$fromInt(round) + ' rounds'))))
-										])),
-									A2($elm$html$Html$br, _List_Nil, _List_Nil),
-									A2(
-									styledTeam,
-									function ($) {
-										return $.shortName;
-									},
-									s.match.host),
-									A2(
-									$elm$html$Html$span,
-									_List_Nil,
-									_List_fromArray(
-										[
-											function () {
-											var _v9 = s.match.result;
-											if (_v9.$ === 'Final') {
-												var goals = _v9.a;
-												return $elm$html$Html$text(
-													' ' + ($elm$core$String$fromInt(goals.host) + (' – ' + ($elm$core$String$fromInt(goals.opponent) + ' '))));
-											} else {
-												var odds = _v9.a;
-												var total = (odds.win + odds.draw) + odds.lose;
-												return $elm$html$Html$text(
-													' ' + ($elm$core$String$fromInt(((100 * odds.win) / total) | 0) + ('% ' + ($elm$core$String$fromInt(((100 * odds.draw) / total) | 0) + ('% ' + ($elm$core$String$fromInt(((100 * odds.lose) / total) | 0) + '% '))))));
-											}
-										}()
-										])),
-									A2(
-									styledTeam,
-									function ($) {
-										return $.shortName;
-									},
-									s.match.opponent)
-								]))
-						]);
-				};
 				return _List_fromArray(
 					[
 						A4(
@@ -24897,21 +25032,32 @@ var $author$project$Sage$Plot$plot = F6(
 						A2(
 							$elm$core$Maybe$withDefault,
 							_List_Nil,
-							A2($elm$core$Maybe$map, scoreView, score)))
+							A2(
+								$elm$core$Maybe$map,
+								A2($author$project$Sage$Plot$scoreView, round, team),
+								score)))
 					]);
 			});
 		var legendTip = F2(
-			function (_v7, item) {
-				var _v4 = $terezka$elm_charts$Chart$Item$getData(item);
-				var round = _v4.a;
-				var team = _v4.b;
+			function (_v10, item) {
+				var _v7 = $terezka$elm_charts$Chart$Item$getData(item);
+				var round = _v7.a;
+				var team = _v7.b;
 				var isLast = function () {
-					var _v6 = A2($author$project$Sage$Plot$scoresForTeam, team, data);
-					if (_v6.$ === 'Just') {
-						var scores = _v6.a;
-						return _Utils_eq(
-							$elm$core$Array$length(scores),
-							round);
+					var _v9 = A2($author$project$Sage$Plot$scoresForTeam, team, data);
+					if (_v9.$ === 'Just') {
+						var scores = _v9.a;
+						var lastVisibleRound = A3(
+							$elm$core$Basics$apR,
+							A2(
+								$elm$core$Maybe$map,
+								function (m) {
+									return $elm$core$Basics$min(m);
+								},
+								options.maxRound),
+							$elm$core$Maybe$withDefault($elm$core$Basics$identity),
+							$elm$core$Array$length(scores));
+						return _Utils_eq(round, lastVisibleRound);
 					} else {
 						return false;
 					}
@@ -24941,7 +25087,7 @@ var $author$project$Sage$Plot$plot = F6(
 											$elm$html$Html$text(
 											A2($cuducos$elm_format_number$FormatNumber$format, $author$project$Sage$Plot$pointsLocale, score.total) + ' '),
 											A2(
-											styledTeam,
+											$author$project$Sage$Plot$styledTeam,
 											function ($) {
 												return $.name;
 											},
@@ -24954,13 +25100,13 @@ var $author$project$Sage$Plot$plot = F6(
 				}
 			});
 		var focusedTeams = function () {
-			var dotTeams = function (_v3) {
-				var r = _v3.a;
-				var t = _v3.b;
-				var _v2 = scoreForDot(
+			var dotTeams = function (_v6) {
+				var r = _v6.a;
+				var t = _v6.b;
+				var _v5 = scoreForDot(
 					_Utils_Tuple2(r, t));
-				if (_v2.$ === 'Just') {
-					var score = _v2.a;
+				if (_v5.$ === 'Just') {
+					var score = _v5.a;
 					return _List_fromArray(
 						[score.match.host.shortName, score.match.opponent.shortName]);
 				} else {
@@ -24986,34 +25132,79 @@ var $author$project$Sage$Plot$plot = F6(
 		var teamDisplayColor = function (team) {
 			return A2($elm$core$Set$member, team.shortName, focusedTeams) ? team.color : '#EEEEEE';
 		};
+		var lineAttrs = function (team) {
+			return _List_fromArray(
+				[
+					$terezka$elm_charts$Chart$Attributes$color(
+					teamDisplayColor(team))
+				]);
+		};
+		var dotAttrs = F2(
+			function (team, score) {
+				var _v4 = score.match.result;
+				if (_v4.$ === 'Final') {
+					return _List_fromArray(
+						[
+							$terezka$elm_charts$Chart$Attributes$color(
+							teamDisplayColor(team))
+						]);
+				} else {
+					return _List_fromArray(
+						[
+							$terezka$elm_charts$Chart$Attributes$border(
+							teamDisplayColor(team)),
+							$terezka$elm_charts$Chart$Attributes$borderWidth(0.5)
+						]);
+				}
+			});
+		var displayed = A2(
+			$elm$core$List$sortBy,
+			function (_v3) {
+				var t = _v3.a;
+				return A2($elm$core$Set$member, t.shortName, focusedTeams) ? 1 : 0;
+			},
+			data);
+		var commonDotAttrs = function (team) {
+			return _List_fromArray(
+				[
+					$terezka$elm_charts$Chart$Attributes$circle,
+					$terezka$elm_charts$Chart$Attributes$size(3),
+					$terezka$elm_charts$Chart$Attributes$color('#FFF')
+				]);
+		};
 		var rounds = F2(
 			function (team, scores) {
 				return A3(
 					$terezka$elm_charts$Chart$series,
-					A2($elm$core$Basics$composeR, $elm$core$Tuple$first, $elm$core$Basics$toFloat),
+					toX,
 					_List_fromArray(
 						[
 							A2(
 							$terezka$elm_charts$Chart$named,
 							team.name,
-							A3(
-								$terezka$elm_charts$Chart$interpolatedMaybe,
-								A2(
-									$elm$core$Basics$composeR,
-									$elm$core$Tuple$first,
-									toY(scores)),
-								_List_fromArray(
-									[
-										$terezka$elm_charts$Chart$Attributes$color(
-										teamDisplayColor(team))
-									]),
-								_List_fromArray(
-									[
-										$terezka$elm_charts$Chart$Attributes$circle,
-										$terezka$elm_charts$Chart$Attributes$size(2),
-										$terezka$elm_charts$Chart$Attributes$color(
-										teamDisplayColor(team))
-									])))
+							A2(
+								$terezka$elm_charts$Chart$variation,
+								F2(
+									function (_v1, _v2) {
+										var r = _v2.a;
+										var t = _v2.b;
+										return A2(
+											$elm$core$Maybe$withDefault,
+											_List_Nil,
+											A2(
+												$elm$core$Maybe$map,
+												dotAttrs(team),
+												scoreForDot(
+													_Utils_Tuple2(r, t))));
+									}),
+								A3(
+									$terezka$elm_charts$Chart$interpolatedMaybe,
+									A2(
+										$elm$core$Basics$composeR,
+										$elm$core$Tuple$first,
+										toY(scores)),
+									lineAttrs(team),
+									commonDotAttrs(team))))
 						]),
 					A2(
 						$elm$core$List$map,
@@ -25022,13 +25213,6 @@ var $author$project$Sage$Plot$plot = F6(
 						},
 						A2($elm$core$List$range, 1, 19)));
 			});
-		var displayed = A2(
-			$elm$core$List$sortBy,
-			function (_v1) {
-				var t = _v1.a;
-				return A2($elm$core$Set$member, t.shortName, focusedTeams) ? 1 : 0;
-			},
-			data);
 		return A2(
 			$terezka$elm_charts$Chart$chart,
 			_List_fromArray(
@@ -25040,8 +25224,24 @@ var $author$project$Sage$Plot$plot = F6(
 					$terezka$elm_charts$Chart$Attributes$range(
 					_List_fromArray(
 						[
-							A2($terezka$elm_charts$Chart$Attributes$lowest, 1, $terezka$elm_charts$Chart$Attributes$exactly),
-							A2($terezka$elm_charts$Chart$Attributes$highest, 19, $terezka$elm_charts$Chart$Attributes$exactly)
+							A2(
+							$elm$core$Maybe$withDefault,
+							A2($terezka$elm_charts$Chart$Attributes$lowest, 1, $terezka$elm_charts$Chart$Attributes$orLower),
+							A2(
+								$elm$core$Maybe$map,
+								function (r) {
+									return A2($terezka$elm_charts$Chart$Attributes$lowest, r, $terezka$elm_charts$Chart$Attributes$exactly);
+								},
+								options.minRound)),
+							A2(
+							$elm$core$Maybe$withDefault,
+							A2($terezka$elm_charts$Chart$Attributes$highest, 19, $terezka$elm_charts$Chart$Attributes$orHigher),
+							A2(
+								$elm$core$Maybe$map,
+								function (r) {
+									return A2($terezka$elm_charts$Chart$Attributes$highest, r, $terezka$elm_charts$Chart$Attributes$exactly);
+								},
+								options.maxRound))
 						])),
 					A2(
 					$terezka$elm_charts$Chart$Events$onMouseMove,
@@ -25076,18 +25276,22 @@ var $author$project$Sage$Plot$plot = F6(
 						]))));
 	});
 var $author$project$App$plotHeight = function (model) {
-	return model.taller ? 450 : 300;
+	return model.taller ? 600 : 450;
 };
-var $author$project$App$plotWidth = 400;
-var $author$project$Sage$Plot$Score = F2(
-	function (match, total) {
-		return {match: match, total: total};
+var $author$project$App$plotWidth = 600;
+var $author$project$Sage$Plot$Odds = F3(
+	function (win, draw, lose) {
+		return {draw: draw, lose: lose, win: win};
+	});
+var $author$project$Sage$Plot$Projected = function (a) {
+	return {$: 'Projected', a: a};
+};
+var $author$project$Sage$Plot$Score = F3(
+	function (match, total, schedule) {
+		return {match: match, schedule: schedule, total: total};
 	});
 var $author$project$Sage$Plot$Final = function (a) {
 	return {$: 'Final', a: a};
-};
-var $author$project$Sage$Plot$Projected = function (a) {
-	return {$: 'Projected', a: a};
 };
 var $author$project$Sage$Football$applyPredictor = F2(
 	function (predictor, _v0) {
@@ -25190,18 +25394,44 @@ var $author$project$Sage$Football$toScores = F2(
 						season))));
 		var match = F2(
 			function (team, round) {
+				var indexedConcatMap = function (f) {
+					return A2(
+						$elm$core$Basics$composeR,
+						$elm$core$List$indexedMap($elm$core$Tuple$pair),
+						$elm$core$List$concatMap(
+							function (_v4) {
+								var ai = _v4.a;
+								var xs = _v4.b;
+								return A2(
+									$elm$core$List$indexedMap,
+									F2(
+										function (bi, x) {
+											return A2(
+												f,
+												_Utils_Tuple2(ai, bi),
+												x);
+										}),
+									xs);
+							}));
+				};
 				return $elm$core$List$head(
 					A2(
 						$elm$core$List$filterMap,
-						function (m) {
-							return (_Utils_eq(m.host, team) || _Utils_eq(m.opponent, team)) ? $elm$core$Maybe$Just(m) : $elm$core$Maybe$Nothing;
+						function (_v3) {
+							var sch = _v3.a;
+							var m = _v3.b;
+							return (_Utils_eq(m.host, team) || _Utils_eq(m.opponent, team)) ? $elm$core$Maybe$Just(
+								_Utils_Tuple2(m, sch)) : $elm$core$Maybe$Nothing;
 						},
 						A2(
-							$elm$core$List$concatMap,
-							function ($) {
-								return $.matches;
-							},
-							round.matches)));
+							indexedConcatMap,
+							$elm$core$Tuple$pair,
+							A2(
+								$elm$core$List$map,
+								function ($) {
+									return $.matches;
+								},
+								round.matches))));
 			});
 		var scores = function (team) {
 			return $elm$core$Array$fromList(
@@ -25213,9 +25443,25 @@ var $author$project$Sage$Football$toScores = F2(
 								var prevTotal = _v0.a;
 								var res = _v0.b;
 								if (mm.$ === 'Nothing') {
-									return _Utils_Tuple2(prevTotal, res);
+									return _Utils_Tuple2(
+										prevTotal,
+										A2(
+											$elm$core$List$cons,
+											A3(
+												$author$project$Sage$Plot$Score,
+												A3(
+													$author$project$Sage$Plot$Match,
+													team,
+													team,
+													$author$project$Sage$Plot$Projected(
+														A3($author$project$Sage$Plot$Odds, 0, 0, 0))),
+												prevTotal,
+												_Utils_Tuple2(0, 0)),
+											res));
 								} else {
-									var m = mm.a;
+									var _v2 = mm.a;
+									var m = _v2.a;
+									var sch = _v2.b;
 									var result = A2($author$project$Sage$Football$applyPredictor, predict, m);
 									var pts = A2($author$project$Sage$Football$teamPoints, team, result);
 									var total = prevTotal + pts;
@@ -25223,7 +25469,7 @@ var $author$project$Sage$Football$toScores = F2(
 										total,
 										A2(
 											$elm$core$List$cons,
-											A2($author$project$Sage$Plot$Score, result, total),
+											A3($author$project$Sage$Plot$Score, result, total, sch),
 											res));
 								}
 							}),
@@ -25243,6 +25489,31 @@ var $author$project$Sage$Football$toScores = F2(
 			teams);
 	});
 var $author$project$App$view = function (model) {
+	var season = $author$project$Sage$EPL2025$matches;
+	var options = function () {
+		var _v3 = function () {
+			if (model.recentOnly) {
+				var cur = $author$project$Sage$Football$currentRound(season);
+				return _Utils_Tuple2(
+					$elm$core$Maybe$Just(cur - 5),
+					$elm$core$Maybe$Just(
+						A2($elm$core$Basics$min, 19, cur + 3)));
+			} else {
+				return _Utils_Tuple2($elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing);
+			}
+		}();
+		var minRound = _v3.a;
+		var maxRound = _v3.b;
+		return {dayXOffset: 1 / 5, matchXOffset: 1 / 25, maxRound: maxRound, minRound: minRound, style: model.style};
+	}();
+	var isPlayed = function (match) {
+		var _v2 = match.result;
+		if (_v2.$ === 'Final') {
+			return true;
+		} else {
+			return false;
+		}
+	};
 	var scores = function () {
 		var _v0 = model.predictor;
 		if (_v0.$ === 'Nothing') {
@@ -25255,20 +25526,18 @@ var $author$project$App$view = function (model) {
 						t,
 						A2(
 							$elm$core$Array$filter,
-							function (s) {
-								var _v2 = s.match.result;
-								if (_v2.$ === 'Final') {
-									return true;
-								} else {
-									return false;
-								}
-							},
+							A2(
+								$elm$core$Basics$composeR,
+								function ($) {
+									return $.match;
+								},
+								isPlayed),
 							rs));
 				},
-				A2($author$project$Sage$Football$toScores, $author$project$Sage$Football$PredictEvenOdds, $author$project$Sage$EPL2025$matches));
+				A2($author$project$Sage$Football$toScores, $author$project$Sage$Football$PredictEvenOdds, season));
 		} else {
 			var predictor = _v0.a;
-			return A2($author$project$Sage$Football$toScores, predictor, $author$project$Sage$EPL2025$matches);
+			return A2($author$project$Sage$Football$toScores, predictor, season);
 		}
 	}();
 	return A2(
@@ -25306,7 +25575,7 @@ var $author$project$App$view = function (model) {
 						A6(
 							$author$project$Sage$Plot$plot,
 							$author$project$App$OnHover,
-							model.style,
+							options,
 							$author$project$App$plotWidth,
 							$author$project$App$plotHeight(model),
 							scores,
@@ -25316,7 +25585,7 @@ var $author$project$App$view = function (model) {
 var $author$project$App$main = $elm$browser$Browser$sandbox(
 	{init: $author$project$App$init, update: $author$project$App$update, view: $author$project$App$view});
 _Platform_export({'App':{'init':$author$project$App$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"App.Msg","aliases":{"Chart.Item.Dot":{"args":[],"type":"Internal.Svg.Dot"},"Internal.Svg.Dot":{"args":[],"type":"{ color : String.String, opacity : Basics.Float, size : Basics.Float, border : String.String, borderWidth : Basics.Float, borderOpacity : Basics.Float, highlight : Basics.Float, highlightWidth : Basics.Float, highlightColor : String.String, shape : Maybe.Maybe Internal.Svg.Shape, hideOverflow : Basics.Bool }"},"Sage.Plot.Dot":{"args":[],"type":"Chart.Item.One ( Basics.Int, Sage.Plot.Team ) Chart.Item.Dot"},"Internal.Property.Identification":{"args":[],"type":"{ stackIndex : Basics.Int, seriesIndex : Basics.Int, absoluteIndex : Basics.Int, dataIndex : Basics.Int, elementIndex : Basics.Int }"},"Chart.Item.One":{"args":["data","x"],"type":"Internal.Item.One data x"},"Internal.Item.One":{"args":["data","x"],"type":"Internal.Item.Rendered { presentation : x, color : String.String, datum : data, x1 : Basics.Float, x2 : Basics.Float, y : Basics.Float, isReal : Basics.Bool, tooltipText : String.String, name : Maybe.Maybe String.String, identification : Internal.Property.Identification, toAny : x -> Internal.Item.Any }"},"Sage.Plot.Team":{"args":[],"type":"{ shortName : Sage.Plot.TeamId, name : String.String, longName : String.String, color : String.String }"},"Sage.Plot.TeamId":{"args":[],"type":"String.String"},"Svg.Attribute":{"args":["msg"],"type":"VirtualDom.Attribute msg"},"Internal.Coordinates.Axis":{"args":[],"type":"{ length : Basics.Float, marginMin : Basics.Float, marginMax : Basics.Float, dataMin : Basics.Float, dataMax : Basics.Float, min : Basics.Float, max : Basics.Float, flip : Basics.Bool }"},"Internal.Svg.Bar":{"args":[],"type":"{ roundTop : Basics.Float, roundBottom : Basics.Float, color : String.String, border : String.String, borderWidth : Basics.Float, opacity : Basics.Float, design : Maybe.Maybe Internal.Svg.Design, attrs : List.List (Svg.Attribute Basics.Never), highlight : Basics.Float, highlightWidth : Basics.Float, highlightColor : String.String }"},"Html.Html":{"args":["msg"],"type":"VirtualDom.Node msg"},"Internal.Coordinates.Limits":{"args":[],"type":"Internal.Coordinates.Position"},"Internal.Coordinates.Plane":{"args":[],"type":"{ x : Internal.Coordinates.Axis, y : Internal.Coordinates.Axis }"},"Internal.Coordinates.Position":{"args":[],"type":"{ x1 : Basics.Float, x2 : Basics.Float, y1 : Basics.Float, y2 : Basics.Float }"},"Svg.Svg":{"args":["msg"],"type":"VirtualDom.Node msg"},"Internal.Svg.Pattern":{"args":[],"type":"{ color : String.String, width : Basics.Float, spacing : Basics.Float, rotate : Basics.Float }"}},"unions":{"App.Msg":{"args":[],"tags":{"OnHover":["List.List Sage.Plot.Dot"],"SelectPredictor":["Maybe.Maybe Sage.Football.Predictor"],"SelectStyle":["Sage.Plot.Style"],"SelectTaller":["Basics.Bool"]}},"Internal.Item.Any":{"args":[],"tags":{"Dot":["Internal.Svg.Dot"],"Bar":["Internal.Svg.Bar"],"Custom":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Sage.Football.Predictor":{"args":[],"tags":{"PredictHostWins":[],"PredictEvenOdds":[]}},"Internal.Item.Rendered":{"args":["meta"],"tags":{"Rendered":["meta","{ limits : Internal.Coordinates.Limits, position : Internal.Coordinates.Position, localPlane : Internal.Coordinates.Plane, limitsTop : Internal.Coordinates.Limits, positionTop : Internal.Coordinates.Position, planeTop : Internal.Coordinates.Plane, render : () -> Svg.Svg Basics.Never, tooltip : () -> List.List (Html.Html Basics.Never) }"]}},"Internal.Svg.Shape":{"args":[],"tags":{"Circle":[],"Triangle":[],"Square":[],"Diamond":[],"Cross":[],"Plus":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Sage.Plot.Style":{"args":[],"tags":{"Simple":[],"Flatter":[]}},"VirtualDom.Attribute":{"args":["msg"],"tags":{"Attribute":[]}},"Internal.Svg.Design":{"args":[],"tags":{"Striped":["List.List (Internal.Helpers.Attribute Internal.Svg.Pattern)"],"Dotted":["List.List (Internal.Helpers.Attribute Internal.Svg.Pattern)"],"Gradient":["List.List String.String"]}},"Basics.Never":{"args":[],"tags":{"JustOneMore":["Basics.Never"]}},"VirtualDom.Node":{"args":["msg"],"tags":{"Node":[]}},"Internal.Helpers.Attribute":{"args":["c"],"tags":{"Attribute":["c -> c"]}}}}})}});}(this));
+	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"App.Msg","aliases":{"Chart.Item.Dot":{"args":[],"type":"Internal.Svg.Dot"},"Internal.Svg.Dot":{"args":[],"type":"{ color : String.String, opacity : Basics.Float, size : Basics.Float, border : String.String, borderWidth : Basics.Float, borderOpacity : Basics.Float, highlight : Basics.Float, highlightWidth : Basics.Float, highlightColor : String.String, shape : Maybe.Maybe Internal.Svg.Shape, hideOverflow : Basics.Bool }"},"Sage.Plot.Dot":{"args":[],"type":"Chart.Item.One ( Basics.Int, Sage.Plot.Team ) Chart.Item.Dot"},"Internal.Property.Identification":{"args":[],"type":"{ stackIndex : Basics.Int, seriesIndex : Basics.Int, absoluteIndex : Basics.Int, dataIndex : Basics.Int, elementIndex : Basics.Int }"},"Chart.Item.One":{"args":["data","x"],"type":"Internal.Item.One data x"},"Internal.Item.One":{"args":["data","x"],"type":"Internal.Item.Rendered { presentation : x, color : String.String, datum : data, x1 : Basics.Float, x2 : Basics.Float, y : Basics.Float, isReal : Basics.Bool, tooltipText : String.String, name : Maybe.Maybe String.String, identification : Internal.Property.Identification, toAny : x -> Internal.Item.Any }"},"Sage.Plot.Team":{"args":[],"type":"{ shortName : Sage.Plot.TeamId, name : String.String, longName : String.String, color : String.String }"},"Sage.Plot.TeamId":{"args":[],"type":"String.String"},"Svg.Attribute":{"args":["msg"],"type":"VirtualDom.Attribute msg"},"Internal.Coordinates.Axis":{"args":[],"type":"{ length : Basics.Float, marginMin : Basics.Float, marginMax : Basics.Float, dataMin : Basics.Float, dataMax : Basics.Float, min : Basics.Float, max : Basics.Float, flip : Basics.Bool }"},"Internal.Svg.Bar":{"args":[],"type":"{ roundTop : Basics.Float, roundBottom : Basics.Float, color : String.String, border : String.String, borderWidth : Basics.Float, opacity : Basics.Float, design : Maybe.Maybe Internal.Svg.Design, attrs : List.List (Svg.Attribute Basics.Never), highlight : Basics.Float, highlightWidth : Basics.Float, highlightColor : String.String }"},"Html.Html":{"args":["msg"],"type":"VirtualDom.Node msg"},"Internal.Coordinates.Limits":{"args":[],"type":"Internal.Coordinates.Position"},"Internal.Coordinates.Plane":{"args":[],"type":"{ x : Internal.Coordinates.Axis, y : Internal.Coordinates.Axis }"},"Internal.Coordinates.Position":{"args":[],"type":"{ x1 : Basics.Float, x2 : Basics.Float, y1 : Basics.Float, y2 : Basics.Float }"},"Svg.Svg":{"args":["msg"],"type":"VirtualDom.Node msg"},"Internal.Svg.Pattern":{"args":[],"type":"{ color : String.String, width : Basics.Float, spacing : Basics.Float, rotate : Basics.Float }"}},"unions":{"App.Msg":{"args":[],"tags":{"OnHover":["List.List Sage.Plot.Dot"],"SelectPredictor":["Maybe.Maybe Sage.Football.Predictor"],"SelectStyle":["Sage.Plot.Style"],"SelectTaller":["Basics.Bool"],"SelectRecentOnly":["Basics.Bool"]}},"Internal.Item.Any":{"args":[],"tags":{"Dot":["Internal.Svg.Dot"],"Bar":["Internal.Svg.Bar"],"Custom":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Sage.Football.Predictor":{"args":[],"tags":{"PredictHostWins":[],"PredictEvenOdds":[]}},"Internal.Item.Rendered":{"args":["meta"],"tags":{"Rendered":["meta","{ limits : Internal.Coordinates.Limits, position : Internal.Coordinates.Position, localPlane : Internal.Coordinates.Plane, limitsTop : Internal.Coordinates.Limits, positionTop : Internal.Coordinates.Position, planeTop : Internal.Coordinates.Plane, render : () -> Svg.Svg Basics.Never, tooltip : () -> List.List (Html.Html Basics.Never) }"]}},"Internal.Svg.Shape":{"args":[],"tags":{"Circle":[],"Triangle":[],"Square":[],"Diamond":[],"Cross":[],"Plus":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Sage.Plot.Style":{"args":[],"tags":{"Simple":[],"Flatter":[]}},"VirtualDom.Attribute":{"args":["msg"],"tags":{"Attribute":[]}},"Internal.Svg.Design":{"args":[],"tags":{"Striped":["List.List (Internal.Helpers.Attribute Internal.Svg.Pattern)"],"Dotted":["List.List (Internal.Helpers.Attribute Internal.Svg.Pattern)"],"Gradient":["List.List String.String"]}},"Basics.Never":{"args":[],"tags":{"JustOneMore":["Basics.Never"]}},"VirtualDom.Node":{"args":["msg"],"tags":{"Node":[]}},"Internal.Helpers.Attribute":{"args":["c"],"tags":{"Attribute":["c -> c"]}}}}})}});}(this));
 
   var app = Elm.App.init({ node: document.getElementById("elm") });
 }
