@@ -2,14 +2,13 @@ module App exposing (..)
 
 import Array
 import Browser
-import Element exposing (Element, alignTop, column, el, row, spacing, text)
+import Element exposing (Element, alignTop, column, el, paddingXY, row, spacing, text)
 import Element.Font as Font
 import Element.Input exposing (checkbox, defaultCheckbox, labelRight)
 import Html exposing (Html)
 import Sage.EPL2025 as EPL2025
-import Sage.Football exposing (Predictor(..), toScores)
+import Sage.Football exposing (Predictor(..), currentRound, toScores)
 import Sage.Plot exposing (Dot, Result(..), Style(..), plot)
-import Element exposing (paddingXY)
 
 
 main : Program () Model Msg
@@ -26,15 +25,17 @@ type alias Model =
     , predictor : Maybe Predictor
     , style : Style
     , taller : Bool
+    , recentOnly : Bool
     }
 
 
 init : Model
 init =
     { hovering = []
-    , predictor = Nothing
+    , predictor = Just PredictEvenOdds
     , style = Simple
     , taller = False
+    , recentOnly = True
     }
 
 
@@ -43,6 +44,7 @@ type Msg
     | SelectPredictor (Maybe Predictor)
     | SelectStyle Style
     | SelectTaller Bool
+    | SelectRecentOnly Bool
 
 
 update : Msg -> Model -> Model
@@ -60,45 +62,66 @@ update msg model =
         SelectTaller taller ->
             { model | taller = taller }
 
+        SelectRecentOnly recentOnly ->
+            { model | recentOnly = recentOnly }
+
+
 plotWidth : Int
-plotWidth = 400
+plotWidth =
+    600
+
 
 plotHeight : Model -> Int
 plotHeight model =
     if model.taller then
-        450
+        600
 
     else
-        300
+        450
 
 
 view : Model -> Html Msg
 view model =
     let
+        season =
+            EPL2025.matches
+
+        isPlayed match =
+            case match.result of
+                Final _ ->
+                    True
+
+                Projected _ ->
+                    False
+
         scores =
             case model.predictor of
                 Nothing ->
-                    EPL2025.matches
+                    season
                         |> toScores PredictEvenOdds
-                        |> List.map
-                            (\( t, rs ) ->
-                                ( t
-                                , rs
-                                    |> Array.filter
-                                        (\s ->
-                                            case s.match.result of
-                                                Final _ ->
-                                                    True
-
-                                                Projected _ ->
-                                                    False
-                                        )
-                                )
-                            )
+                        |> List.map (\( t, rs ) -> ( t, rs |> Array.filter (.match >> isPlayed) ))
 
                 Just predictor ->
-                    EPL2025.matches
+                    season
                         |> toScores predictor
+
+        options =
+            let
+                ( minRound, maxRound ) =
+                    if model.recentOnly then
+                        let
+                            cur =
+                                currentRound season
+                        in
+                        ( Just (cur - 5), Just (cur + 3 |> min 19) )
+
+                    else
+                        ( Nothing, Nothing )
+            in
+            { style = model.style
+            , minRound = minRound
+            , maxRound = maxRound
+            }
     in
     Element.layout [] <|
         column
@@ -115,7 +138,7 @@ view model =
                 ]
               <|
                 Element.html <|
-                    plot OnHover model.style plotWidth (plotHeight model) scores model.hovering
+                    plot OnHover options plotWidth (plotHeight model) scores model.hovering
 
             -- , column []
             --     (toScores EPL2025.matches |> List.map (Debug.toString >> text))
@@ -183,6 +206,12 @@ optionsView model =
                 , icon = defaultCheckbox
                 , checked = model.taller
                 , label = labelRight [] (text "Taller")
+                }
+            , checkbox []
+                { onChange = always <| SelectRecentOnly (not model.recentOnly)
+                , icon = defaultCheckbox
+                , checked = model.recentOnly
+                , label = labelRight [] (text "Recent Matches Only")
                 }
             ]
         ]

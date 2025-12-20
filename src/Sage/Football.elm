@@ -125,6 +125,47 @@ applyPredictor predictor { host, opponent, result } =
     Match host opponent predicted
 
 
+flatMatches : Round -> List (Match (Maybe Goals))
+flatMatches =
+    .matches >> List.concatMap .matches
+
+
+{-| Number of the round which is probably most interesting to look at: the latest round that has any
+matches completed, or the one after (if any), if _all_ matches in that round are completed.
+Note: the number is the value stored in the data, not the actual position in the list (which might
+be off-by-one, or worse.)
+-}
+currentRound : Season -> Int
+currentRound rounds =
+    let
+        isPlayed : Match (Maybe Goals) -> Bool
+        isPlayed =
+            .result >> Maybe.map (always True) >> Maybe.withDefault False
+
+        roundsRev =
+            rounds |> List.reverse
+
+        lastRound : Maybe Round
+        lastRound =
+            roundsRev |> List.head
+
+        lastWithPlayed : Maybe Round
+        lastWithPlayed =
+            roundsRev
+                |> List.filter (flatMatches >> List.any isPlayed)
+                |> List.head
+    in
+    case ( lastWithPlayed, lastRound ) of
+        ( Just lwp, _ ) ->
+            lwp.number
+
+        ( Nothing, Just l ) ->
+            l.number
+
+        ( Nothing, Nothing ) ->
+            1
+
+
 toScores : Predictor -> Season -> Data
 toScores predict season =
     let

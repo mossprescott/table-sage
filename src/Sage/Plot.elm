@@ -96,6 +96,13 @@ type Style
     | Flatter
 
 
+type alias Options =
+    { style : Style
+    , minRound : Maybe Int
+    , maxRound : Maybe Int
+    }
+
+
 scoresForTeam : Team -> Data -> Maybe (Array Score)
 scoresForTeam team data =
     data
@@ -115,8 +122,60 @@ pointsLocale =
     { usLocale | decimals = FNL.Max 1 }
 
 
-plot : (List Dot -> msg) -> Style -> Int -> Int -> Data -> List Dot -> Html msg
-plot onHover style width height data hovering =
+{-| Display a string in the team's color(s).
+-}
+styledTeam : (Team -> String) -> Team -> Html Never
+styledTeam field team =
+    Html.span
+        [ HA.style "color" team.color ]
+        [ Html.text (field team)
+        ]
+
+
+{-| Display a match/result, in the context of a particluar dot (i.e. the round and one of the teams.)
+-}
+scoreView : Int -> Team -> Score -> List (Html Never)
+scoreView round team s =
+    [ Html.div []
+        [ Html.span []
+            [ styledTeam .name team
+            , Html.text <| ": " ++ FN.format pointsLocale s.total ++ " after " ++ String.fromInt round ++ " rounds"
+            ]
+        , Html.br [] []
+        , styledTeam .shortName s.match.host
+        , Html.span []
+            [ case s.match.result of
+                Final goals ->
+                    Html.text
+                        (" "
+                            ++ String.fromInt goals.host
+                            ++ " – "
+                            ++ String.fromInt goals.opponent
+                            ++ " "
+                        )
+
+                Projected odds ->
+                    let
+                        total =
+                            odds.win + odds.draw + odds.lose
+                    in
+                    Html.text
+                        (" "
+                            ++ String.fromInt (truncate (100 * odds.win / total))
+                            ++ "% "
+                            ++ String.fromInt (truncate (100 * odds.draw / total))
+                            ++ "% "
+                            ++ String.fromInt (truncate (100 * odds.lose / total))
+                            ++ "% "
+                        )
+            ]
+        , styledTeam .shortName s.match.opponent
+        ]
+    ]
+
+
+plot : (List Dot -> msg) -> Options -> Int -> Int -> Data -> List Dot -> Html msg
+plot onHover { style, minRound, maxRound } width height data hovering =
     let
         scoreForDot : ( Int, Team ) -> Maybe Score
         scoreForDot ( round, team ) =
@@ -163,13 +222,6 @@ plot onHover style width height data hovering =
                             0
                     )
 
-        styledTeam : (Team -> String) -> Team -> Html Never
-        styledTeam field team =
-            Html.span
-                [ HA.style "color" team.color ]
-                [ Html.text (field team)
-                ]
-
         toY : Array Score -> Int -> Maybe Float
         toY scores round =
             scores
@@ -183,6 +235,7 @@ plot onHover style width height data hovering =
                             s.total
                     )
 
+        -- Color for the team's scores, based on display state (focused or not)
         teamDisplayColor team =
             if Set.member team.shortName focusedTeams then
                 team.color
@@ -215,51 +268,12 @@ plot onHover style width height data hovering =
                 score : Maybe Score
                 score =
                     scoreForDot ( round, team )
-
-                scoreView : Score -> List (Html Never)
-                scoreView s =
-                    [ Html.div []
-                        [ Html.span []
-                            [ styledTeam .name team
-                            , Html.text <| ": " ++ FN.format pointsLocale s.total ++ " after " ++ String.fromInt round ++ " rounds"
-                            ]
-                        , Html.br [] []
-                        , styledTeam .shortName s.match.host
-                        , Html.span []
-                            [ case s.match.result of
-                                Final goals ->
-                                    Html.text
-                                        (" "
-                                            ++ String.fromInt goals.host
-                                            ++ " – "
-                                            ++ String.fromInt goals.opponent
-                                            ++ " "
-                                        )
-
-                                Projected odds ->
-                                    let
-                                        total =
-                                            odds.win + odds.draw + odds.lose
-                                    in
-                                    Html.text
-                                        (" "
-                                            ++ String.fromInt (truncate (100 * odds.win / total))
-                                            ++ "% "
-                                            ++ String.fromInt (truncate (100 * odds.draw / total))
-                                            ++ "% "
-                                            ++ String.fromInt (truncate (100 * odds.lose / total))
-                                            ++ "% "
-                                        )
-                            ]
-                        , styledTeam .shortName s.match.opponent
-                        ]
-                    ]
             in
             [ C.tooltip item
                 [ CA.onLeftOrRight ]
                 []
                 (score
-                    |> Maybe.map scoreView
+                    |> Maybe.map (scoreView round team)
                     |> Maybe.withDefault []
                 )
             ]
@@ -277,7 +291,11 @@ plot onHover style width height data hovering =
                 isLast =
                     case data |> scoresForTeam team of
                         Just scores ->
-                            Array.length scores == round
+                            let
+                                lastVisibleRound =
+                                    maxRound |> Maybe.withDefault (Array.length scores)
+                            in
+                            round == lastVisibleRound
 
                         Nothing ->
                             False
@@ -315,7 +333,14 @@ plot onHover style width height data hovering =
         [ CA.height <| toFloat height
         , CA.width <| toFloat width
         , CA.padding { top = 0, left = 30, right = 30, bottom = 0 }
-        , CA.range [ CA.lowest 1 CA.exactly, CA.highest 19 CA.exactly ]
+        , CA.range
+            [ minRound
+                |> Maybe.map (\r -> CA.lowest (toFloat r) CA.exactly)
+                |> Maybe.withDefault (CA.lowest 1 CA.orLower)
+            , maxRound
+                |> Maybe.map (\r -> CA.highest (toFloat r) CA.exactly)
+                |> Maybe.withDefault (CA.highest 19 CA.orHigher)
+            ]
 
         -- , CA.domain [ CA.lowest 0 CA.orLower, CA.highest 40 CA.orHigher ]
         , CE.onMouseMove onHover (CE.getNearest CI.dots)
