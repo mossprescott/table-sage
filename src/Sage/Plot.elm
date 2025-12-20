@@ -243,6 +243,32 @@ plot onHover { style, minRound, maxRound } width height data hovering =
             else
                 "#EEEEEE"
 
+        lineAttrs team =
+            [ CA.color <| teamDisplayColor team
+            ]
+
+        commonDotAttrs team =
+            [ CA.circle
+            , CA.size 3
+
+            -- This becomes the fill when a border is added
+            , CA.color "#FFF"
+            ]
+
+        -- Attributes that are overridden for dots where a score is known (real or projected)
+        -- dotAttrs : Team -> Score -> List (CA.Attribute {a | color : String, shape : Maybe svg})
+        dotAttrs team score =
+            case score |> .match |> .result of
+                Final _ ->
+                    -- TODO: style for W/L/D result (host's POV)?
+                    [ CA.color <| teamDisplayColor team
+                    ]
+
+                Projected _ ->
+                    [ CA.border <| teamDisplayColor team
+                    , CA.borderWidth 0.5
+                    ]
+
         rounds : Team -> Array Score -> Element msg
         rounds team scores =
             List.range 1 19
@@ -250,12 +276,14 @@ plot onHover { style, minRound, maxRound } width height data hovering =
                 |> C.series (Tuple.first >> toFloat)
                     [ C.interpolatedMaybe
                         (Tuple.first >> toY scores)
-                        [ CA.color <| teamDisplayColor team
-                        ]
-                        [ CA.circle
-                        , CA.size 2
-                        , CA.color <| teamDisplayColor team
-                        ]
+                        (lineAttrs team)
+                        (commonDotAttrs team)
+                        |> C.variation
+                            (\_ ( r, t ) ->
+                                scoreForDot ( r, t )
+                                    |> Maybe.map (dotAttrs team)
+                                    |> Maybe.withDefault []
+                            )
                         |> C.named team.name
                     ]
 
