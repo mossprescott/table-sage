@@ -2,7 +2,7 @@ module Sage.Football exposing (..)
 
 import Array exposing (Array)
 import Dict
-import Sage.Plot exposing (Data, Goals, Match, Result(..), Score, Team, oddsFraction)
+import Sage.Plot exposing (Data, Goals, Match, Odds, Result(..), Score, Team, oddsFraction)
 
 
 pending : Team -> Team -> Match (Maybe Goals)
@@ -177,16 +177,29 @@ toScores predict season =
                 |> List.concatMap (\m -> [ m.host, m.opponent ])
                 |> uniqBy .name
 
-        -- Find the (single) match of the round involving this team, on either side
-        match : Team -> Round -> Maybe (Match (Maybe Goals))
+        -- Find the (single) match of the round involving this team, on either side, along with
+        -- the tuple that records where it appears in the round's schedule.
+        match : Team -> Round -> Maybe ( Match (Maybe Goals), ( Int, Int ) )
         match team round =
+            let
+                -- indexedMap, but for nested lists, with a pair of indices, and also
+                -- flattening the lists
+                indexedConcatMap : ((Int, Int) -> a -> b) -> List (List a) -> List b
+                indexedConcatMap f =
+                    List.indexedMap Tuple.pair
+                        >> List.concatMap
+                            (\( ai, xs ) ->
+                                List.indexedMap (\bi x -> ( f ( ai, bi ) x )) xs
+                            )
+            in
             round
                 |> .matches
-                |> List.concatMap .matches
+                |> List.map .matches
+                |> indexedConcatMap Tuple.pair
                 |> List.filterMap
-                    (\m ->
+                    (\( sch, m ) ->
                         if m.host == team || m.opponent == team then
-                            Just m
+                            Just ( m, sch )
 
                         else
                             Nothing
@@ -201,10 +214,11 @@ toScores predict season =
                     (\mm ( prevTotal, res ) ->
                         case mm of
                             Nothing ->
-                                -- FIXME: an error state, but this shifts all subsequent matches
-                                ( prevTotal, res )
+                                -- Tricky: if there's a missing round, inject a bogus match so we don't end up with a
+                                -- mismatch in the "matrix" of results.
+                                ( prevTotal, Score (Match team team (Projected (Odds 0 0 0))) prevTotal ( 0, 0 ) :: res )
 
-                            Just m ->
+                            Just ( m, sch ) ->
                                 let
                                     result : Match Result
                                     result =
@@ -216,7 +230,7 @@ toScores predict season =
                                     total =
                                         prevTotal + pts
                                 in
-                                ( total, Score result total :: res )
+                                ( total, Score result total sch :: res )
                     )
                     ( 0.0, [] )
                 |> Tuple.second

@@ -3,6 +3,7 @@ module Sage.Plot exposing
     , Dot
     , Goals
     , Match
+    , Odds
     , Result(..)
     , Score
     , Style(..)
@@ -72,6 +73,10 @@ type Result
 type alias Score =
     { match : Match Result
     , total : Float
+
+    -- |Match scheduling hint, which indicates what day of the round and what position in the day's
+    -- sequence of matches this match occurs.
+    , schedule : ( Int, Int )
     }
 
 
@@ -100,6 +105,13 @@ type alias Options =
     { style : Style
     , minRound : Maybe Int
     , maxRound : Maybe Int
+
+    -- |How far to shift a match's dot to the right, for each day it is later than the first day of the round.
+    , dayXOffset : Float
+
+    --| How far to shift a match's dot to the right, for each position within the same day's matches, which
+    -- roughly reflects start time.
+    , matchXOffset : Float
     }
 
 
@@ -175,7 +187,7 @@ scoreView round team s =
 
 
 plot : (List Dot -> msg) -> Options -> Int -> Int -> Data -> List Dot -> Html msg
-plot onHover { style, minRound, maxRound } width height data hovering =
+plot onHover options width height data hovering =
     let
         scoreForDot : ( Int, Team ) -> Maybe Score
         scoreForDot ( round, team ) =
@@ -228,12 +240,25 @@ plot onHover { style, minRound, maxRound } width height data hovering =
                 |> Array.get (round - 1)
                 |> Maybe.map
                     (\s ->
-                        if style == Flatter then
+                        if options.style == Flatter then
                             s.total - toFloat round
 
                         else
                             s.total
                     )
+
+        toX : ( Int, Team ) -> Float
+        toX ( round, team ) =
+            let
+                score =
+                    scoreForDot ( round, team )
+
+                ( dayInRound, matchInDay ) =
+                    score |> Maybe.map .schedule |> Maybe.withDefault ( 0, 0 )
+            in
+            toFloat round
+                + (toFloat dayInRound * options.dayXOffset)
+                + (toFloat matchInDay * options.matchXOffset)
 
         -- Color for the team's scores, based on display state (focused or not)
         teamDisplayColor team =
@@ -273,7 +298,7 @@ plot onHover { style, minRound, maxRound } width height data hovering =
         rounds team scores =
             List.range 1 19
                 |> List.map (\r -> ( r, team ))
-                |> C.series (Tuple.first >> toFloat)
+                |> C.series toX
                     [ C.interpolatedMaybe
                         (Tuple.first >> toY scores)
                         (lineAttrs team)
@@ -322,7 +347,7 @@ plot onHover { style, minRound, maxRound } width height data hovering =
                             let
                                 lastVisibleRound =
                                     Array.length scores
-                                        |> (maxRound
+                                        |> (options.maxRound
                                                 |> Maybe.map (\m -> min m)
                                                 |> Maybe.withDefault identity
                                            )
@@ -366,10 +391,10 @@ plot onHover { style, minRound, maxRound } width height data hovering =
         , CA.width <| toFloat width
         , CA.padding { top = 0, left = 30, right = 30, bottom = 0 }
         , CA.range
-            [ minRound
+            [ options.minRound
                 |> Maybe.map (\r -> CA.lowest (toFloat r) CA.exactly)
                 |> Maybe.withDefault (CA.lowest 1 CA.orLower)
-            , maxRound
+            , options.maxRound
                 |> Maybe.map (\r -> CA.highest (toFloat r) CA.exactly)
                 |> Maybe.withDefault (CA.highest 19 CA.orHigher)
             ]

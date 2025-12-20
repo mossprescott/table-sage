@@ -121,6 +121,8 @@ view model =
             { style = model.style
             , minRound = minRound
             , maxRound = maxRound
+            , dayXOffset = 1/5
+            , matchXOffset = 1/25
             }
     in
     Element.layout [] <|
