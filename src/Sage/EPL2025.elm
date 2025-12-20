@@ -426,7 +426,7 @@ matches =
             ]
         , Day "Monday"
             "2025-12-15"
-            [ pending mun bou ]
+            [ final mun 4 4 bou ]
         ]
     , Round 17
         [ Day "Saturday"
