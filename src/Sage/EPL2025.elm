@@ -1,6 +1,6 @@
 module Sage.EPL2025 exposing (..)
 
-import Sage.Football exposing (Day, Round, final, pending)
+import Sage.Football exposing (Day, Round, Season, final, pending)
 import Sage.Plot exposing (Team)
 
 
@@ -110,7 +110,7 @@ wol =
     Team "WOL" "Wolves" "Wolverhampton Wanderers" "#FDB913"
 
 
-matches : List Round
+matches : Season
 matches =
     [ Round 1
         [ Day "Friday"
@@ -442,7 +442,7 @@ matches =
             ]
         , Day "Sunday"
             "2025-12-21"
-            [ pending avl mun
+            [ final avl 2 1 mun
             ]
         , Day "Monday"
             "2025-12-22"

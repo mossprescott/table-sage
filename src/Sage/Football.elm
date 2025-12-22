@@ -1,5 +1,9 @@
 module Sage.Football exposing (..)
 
+{-| A type for describing an entire season as a series of rounds, some with results,
+and functions for applying predictions and mapping to the flatter type for plotting.
+-}
+
 import Array exposing (Array)
 import Dict
 import Sage.Plot exposing (Data, Goals, Match, Odds, Result(..), Score, Team, oddsFraction)
@@ -101,28 +105,34 @@ type alias Season =
 -- - every team plays every other team once
 
 
-type Predictor
-    = PredictHostWins
-    | PredictEvenOdds
+{-| Calculate predicted odds, assuming no knowledge of the actual result (hence the un-inspectable
+"result" parameter). Note: this type idiom doesn't really work in Elm, because the parameter
+ends up getting fixed _somewhere_ when the function is going to be applied, whereas we would
+prefer it to be left open always, and prohibit Predictor instances that actually specify the type.
+-}
+type alias Predictor result =
+    Match result -> Odds
 
 
-applyPredictor : Predictor -> Match (Maybe Goals) -> Match Result
-applyPredictor predictor { host, opponent, result } =
+{-| Replace the result with some new value, not necessarily having the same type.
+-}
+withResult : result -> Match r -> Match result
+withResult result { host, opponent } =
+    Match host opponent result
+
+
+applyPredictor : Predictor () -> Match (Maybe Goals) -> Match Result
+applyPredictor predictor match =
     let
         predicted =
-            case result of
+            case match.result of
                 Just goals ->
                     Final goals
 
                 Nothing ->
-                    case predictor of
-                        PredictHostWins ->
-                            Projected { win = 1.0, draw = 0.0, lose = 0.0 }
-
-                        PredictEvenOdds ->
-                            Projected { win = 0.33, draw = 0.33, lose = 0.33 }
+                    Projected (predictor (match |> withResult ()))
     in
-    Match host opponent predicted
+    match |> withResult predicted
 
 
 flatMatches : Round -> List (Match (Maybe Goals))
@@ -166,7 +176,7 @@ currentRound rounds =
             1
 
 
-toScores : Predictor -> Season -> Data
+toScores : Predictor () -> Season -> Data
 toScores predict season =
     let
         teams : List Team

@@ -7,8 +7,9 @@ import Element.Font as Font
 import Element.Input exposing (button, checkbox, defaultCheckbox, labelRight)
 import Html exposing (Html)
 import Sage.EPL2025 as EPL2025
-import Sage.Football exposing (Predictor(..), currentRound, toScores)
+import Sage.Football exposing (currentRound, toScores)
 import Sage.Plot exposing (Dot, Result(..), Style(..), plot)
+import Sage.Predict as Predict
 
 
 main : Program () Model Msg
@@ -22,7 +23,7 @@ main =
 
 type alias Model =
     { hovering : List Dot
-    , predictor : Maybe Predictor
+    , predictOption : PredictOption
     , predictRounds : Int
     , style : Style
     , taller : Bool
@@ -30,10 +31,18 @@ type alias Model =
     }
 
 
+type PredictOption
+    = PredictNone
+    | PredictHostWins
+    | PredictEvenOdds
+      -- |Predict on the basis of each teams' results, each result considered equally
+    | PredictStatsFlat
+
+
 init : Model
 init =
     { hovering = []
-    , predictor = Just PredictEvenOdds
+    , predictOption = PredictStatsFlat
     , predictRounds = 2
     , style = Simple
     , taller = False
@@ -43,12 +52,12 @@ init =
 
 type Msg
     = OnHover (List Dot)
-    | SelectPredictor (Maybe Predictor)
+    | SelectPredictor PredictOption
+    | IncrementPredictedRounds
+    | DecrementPredictedRounds
     | SelectStyle Style
     | SelectTaller Bool
     | SelectRecentOnly Bool
-    | IncrementPredictedRounds
-    | DecrementPredictedRounds
 
 
 update : Msg -> Model -> Model
@@ -57,8 +66,14 @@ update msg model =
         OnHover hovering ->
             { model | hovering = hovering }
 
-        SelectPredictor predictor ->
-            { model | predictor = predictor }
+        SelectPredictor predictOption ->
+            { model | predictOption = predictOption }
+
+        IncrementPredictedRounds ->
+            { model | predictRounds = model.predictRounds + 1 }
+
+        DecrementPredictedRounds ->
+            { model | predictRounds = model.predictRounds - 1 }
 
         SelectStyle style ->
             { model | style = style }
@@ -68,12 +83,6 @@ update msg model =
 
         SelectRecentOnly recentOnly ->
             { model | recentOnly = recentOnly }
-
-        IncrementPredictedRounds ->
-            { model | predictRounds = model.predictRounds + 1 }
-
-        DecrementPredictedRounds ->
-            { model | predictRounds = model.predictRounds - 1 }
 
 
 plotWidth : Int
@@ -112,15 +121,22 @@ view model =
                     False
 
         scores =
-            case model.predictor of
-                Nothing ->
+            case model.predictOption of
+                PredictNone ->
                     season
-                        |> toScores PredictEvenOdds
+                        |> toScores Predict.evenOdds
                         |> List.map (\( t, rs ) -> ( t, rs |> Array.filter (.match >> isPlayed) ))
 
-                Just predictor ->
+                PredictHostWins ->
                     season
-                        |> toScores predictor
+                        |> toScores Predict.hostWins
+
+                PredictEvenOdds ->
+                    season |> toScores Predict.evenOdds
+
+                PredictStatsFlat ->
+                    season
+                        |> toScores (Predict.flatStats 5 Predict.evenOdds (Predict.flatMatches season))
 
         options =
             let
@@ -133,7 +149,7 @@ view model =
                         ( Just (cur - 5)
                         , Just
                             (cur
-                                + (if model.predictor == Nothing then
+                                + (if model.predictOption == PredictNone then
                                     0
 
                                    else
@@ -193,25 +209,31 @@ optionsView model =
             ]
             [ text "Prediction"
             , checkbox []
-                { onChange = always (SelectPredictor (Just PredictHostWins))
+                { onChange = always (SelectPredictor PredictNone)
                 , icon = defaultCheckbox
-                , checked = model.predictor == Just PredictHostWins
+                , checked = model.predictOption == PredictNone
+                , label = labelRight [] (text "None")
+                }
+            , checkbox []
+                { onChange = always (SelectPredictor PredictHostWins)
+                , icon = defaultCheckbox
+                , checked = model.predictOption == PredictHostWins
                 , label = labelRight [] (text "Host Wins")
                 }
             , checkbox []
-                { onChange = always (SelectPredictor (Just PredictEvenOdds))
+                { onChange = always (SelectPredictor PredictEvenOdds)
                 , icon = defaultCheckbox
-                , checked = model.predictor == Just PredictEvenOdds
+                , checked = model.predictOption == PredictEvenOdds
                 , label = labelRight [] (text "Even Odds")
                 }
             , checkbox []
-                { onChange = always (SelectPredictor Nothing)
+                { onChange = always (SelectPredictor PredictStatsFlat)
                 , icon = defaultCheckbox
-                , checked = model.predictor == Nothing
-                , label = labelRight [] (text "None")
+                , checked = model.predictOption == PredictStatsFlat
+                , label = labelRight [] (text "Statistical: flat")
                 }
             , row [ spacing 8 ] <|
-                if model.predictor == Nothing then
+                if model.predictOption == PredictNone then
                     []
 
                 else

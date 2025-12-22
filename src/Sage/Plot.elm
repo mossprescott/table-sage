@@ -8,6 +8,7 @@ module Sage.Plot exposing
     , Score
     , Style(..)
     , Team
+    , TeamId
     , oddsFraction
     , plot
     )

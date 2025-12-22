@@ -5056,19 +5056,10 @@ var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
 var $elm$core$Basics$False = {$: 'False'};
-var $elm$core$Maybe$Just = function (a) {
-	return {$: 'Just', a: a};
-};
-var $author$project$Sage$Football$PredictEvenOdds = {$: 'PredictEvenOdds'};
+var $author$project$App$PredictStatsFlat = {$: 'PredictStatsFlat'};
 var $author$project$Sage$Plot$Simple = {$: 'Simple'};
 var $elm$core$Basics$True = {$: 'True'};
-var $author$project$App$init = {
-	hovering: _List_Nil,
-	predictor: $elm$core$Maybe$Just($author$project$Sage$Football$PredictEvenOdds),
-	recentOnly: true,
-	style: $author$project$Sage$Plot$Simple,
-	taller: false
-};
+var $author$project$App$init = {hovering: _List_Nil, predictOption: $author$project$App$PredictStatsFlat, predictRounds: 2, recentOnly: true, style: $author$project$Sage$Plot$Simple, taller: false};
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -5091,6 +5082,9 @@ var $elm$json$Json$Decode$OneOf = function (a) {
 	return {$: 'OneOf', a: a};
 };
 var $elm$core$Basics$add = _Basics_add;
+var $elm$core$Maybe$Just = function (a) {
+	return {$: 'Just', a: a};
+};
 var $elm$core$Maybe$Nothing = {$: 'Nothing'};
 var $elm$core$String$all = _String_all;
 var $elm$core$Basics$and = _Basics_and;
@@ -10613,10 +10607,18 @@ var $author$project$App$update = F2(
 					model,
 					{hovering: hovering});
 			case 'SelectPredictor':
-				var predictor = msg.a;
+				var predictOption = msg.a;
 				return _Utils_update(
 					model,
-					{predictor: predictor});
+					{predictOption: predictOption});
+			case 'IncrementPredictedRounds':
+				return _Utils_update(
+					model,
+					{predictRounds: model.predictRounds + 1});
+			case 'DecrementPredictedRounds':
+				return _Utils_update(
+					model,
+					{predictRounds: model.predictRounds - 1});
 			case 'SelectStyle':
 				var style = msg.a;
 				return _Utils_update(
@@ -10637,6 +10639,7 @@ var $author$project$App$update = F2(
 var $author$project$App$OnHover = function (a) {
 	return {$: 'OnHover', a: a};
 };
+var $author$project$App$PredictNone = {$: 'PredictNone'};
 var $mdgriffith$elm_ui$Internal$Model$Unkeyed = function (a) {
 	return {$: 'Unkeyed', a: a};
 };
@@ -16101,6 +16104,8 @@ var $mdgriffith$elm_ui$Element$el = F2(
 				_List_fromArray(
 					[child])));
 	});
+var $author$project$Sage$Predict$evenOdds = $elm$core$Basics$always(
+	{draw: 0.33, lose: 0.33, win: 0.33});
 var $elm$core$Array$filter = F2(
 	function (isGood, array) {
 		return $elm$core$Array$fromList(
@@ -16113,6 +16118,217 @@ var $elm$core$Array$filter = F2(
 				_List_Nil,
 				array));
 	});
+var $author$project$Sage$Football$joinGoals = function (mg) {
+	return A2(
+		$elm$core$Maybe$map,
+		function (result) {
+			return {host: mg.host, opponent: mg.opponent, result: result};
+		},
+		mg.result);
+};
+var $author$project$Sage$Predict$flatMatches = A2(
+	$elm$core$Basics$composeR,
+	$elm$core$List$concatMap(
+		function ($) {
+			return $.matches;
+		}),
+	$elm$core$List$concatMap(
+		A2(
+			$elm$core$Basics$composeR,
+			function ($) {
+				return $.matches;
+			},
+			$elm$core$List$filterMap($author$project$Sage$Football$joinGoals))));
+var $elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$Sage$Predict$Draw = {$: 'Draw'};
+var $author$project$Sage$Predict$Lose = {$: 'Lose'};
+var $author$project$Sage$Predict$Win = {$: 'Win'};
+var $author$project$Sage$Predict$hostResult = function (goals) {
+	return (_Utils_cmp(goals.host, goals.opponent) > 0) ? $author$project$Sage$Predict$Win : ((_Utils_cmp(goals.host, goals.opponent) < 0) ? $author$project$Sage$Predict$Lose : $author$project$Sage$Predict$Draw);
+};
+var $elm$core$Debug$log = _Debug_log;
+var $elm$core$Maybe$map2 = F3(
+	function (func, ma, mb) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var b = mb.a;
+				return $elm$core$Maybe$Just(
+					A2(func, a, b));
+			}
+		}
+	});
+var $author$project$Sage$Predict$opponentResult = function (_v0) {
+	var host = _v0.host;
+	var opponent = _v0.opponent;
+	return $author$project$Sage$Predict$hostResult(
+		{host: opponent, opponent: host});
+};
+var $elm$core$Debug$toString = _Debug_toString;
+var $author$project$Sage$Plot$Match = F3(
+	function (host, opponent, result) {
+		return {host: host, opponent: opponent, result: result};
+	});
+var $author$project$Sage$Football$withResult = F2(
+	function (result, _v0) {
+		var host = _v0.host;
+		var opponent = _v0.opponent;
+		return A3($author$project$Sage$Plot$Match, host, opponent, result);
+	});
+var $author$project$Sage$Predict$flatStats = F4(
+	function (minPlayed, fallback, history, match) {
+		var stats = A3(
+			$elm$core$List$foldl,
+			function (_v0) {
+				var t = _v0.a;
+				var sr = _v0.b;
+				return A2(
+					$elm$core$Dict$update,
+					t,
+					function (sm) {
+						var s = A2(
+							$elm$core$Maybe$withDefault,
+							{draw: 0, lose: 0, win: 0},
+							sm);
+						return $elm$core$Maybe$Just(
+							function () {
+								switch (sr.$) {
+									case 'Win':
+										return _Utils_update(
+											s,
+											{win: s.win + 1});
+									case 'Lose':
+										return _Utils_update(
+											s,
+											{lose: s.lose + 1});
+									default:
+										return _Utils_update(
+											s,
+											{draw: s.draw + 1});
+								}
+							}());
+					});
+			},
+			$elm$core$Dict$empty,
+			A2(
+				$elm$core$List$concatMap,
+				function (m) {
+					return _List_fromArray(
+						[
+							_Utils_Tuple2(
+							m.host.shortName,
+							$author$project$Sage$Predict$hostResult(m.result)),
+							_Utils_Tuple2(
+							m.opponent.shortName,
+							$author$project$Sage$Predict$opponentResult(m.result))
+						]);
+				},
+				history));
+		var orElse = function (f) {
+			return $elm$core$Maybe$withDefault(
+				f(
+					fallback(
+						A2($author$project$Sage$Football$withResult, _Utils_Tuple0, match))));
+		};
+		var mean = F2(
+			function (x, y) {
+				return (x + y) / 2;
+			});
+		var apply = F2(
+			function (f, s) {
+				var played = (s.win + s.lose) + s.draw;
+				return (_Utils_cmp(played, minPlayed) > -1) ? $elm$core$Maybe$Just(
+					f(s) / played) : $elm$core$Maybe$Nothing;
+			});
+		var hostStats = function (f) {
+			return A2(
+				$elm$core$Maybe$andThen,
+				apply(f),
+				A2($elm$core$Dict$get, match.host.shortName, stats));
+		};
+		var opponentStats = function (f) {
+			return A2(
+				$elm$core$Maybe$andThen,
+				apply(f),
+				A2($elm$core$Dict$get, match.opponent.shortName, stats));
+		};
+		return A2(
+			$elm$core$Debug$log,
+			A2(
+				$elm$core$String$join,
+				'\n',
+				_List_fromArray(
+					[
+						match.host.name + (': ' + $elm$core$Debug$toString(
+						A2($elm$core$Dict$get, match.host.shortName, stats))),
+						match.opponent.name + (': ' + $elm$core$Debug$toString(
+						A2($elm$core$Dict$get, match.opponent.shortName, stats)))
+					])),
+			{
+				draw: A2(
+					orElse,
+					function ($) {
+						return $.draw;
+					},
+					A3(
+						$elm$core$Maybe$map2,
+						mean,
+						hostStats(
+							function ($) {
+								return $.draw;
+							}),
+						opponentStats(
+							function ($) {
+								return $.draw;
+							}))),
+				lose: A2(
+					orElse,
+					function ($) {
+						return $.lose;
+					},
+					A3(
+						$elm$core$Maybe$map2,
+						mean,
+						hostStats(
+							function ($) {
+								return $.lose;
+							}),
+						opponentStats(
+							function ($) {
+								return $.win;
+							}))),
+				win: A2(
+					orElse,
+					function ($) {
+						return $.win;
+					},
+					A3(
+						$elm$core$Maybe$map2,
+						mean,
+						hostStats(
+							function ($) {
+								return $.win;
+							}),
+						opponentStats(
+							function ($) {
+								return $.lose;
+							})))
+			});
+	});
+var $author$project$Sage$Predict$hostWins = $elm$core$Basics$always(
+	{draw: 0.0, lose: 0.0, win: 1.0});
 var $mdgriffith$elm_ui$Internal$Model$unstyled = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Unstyled, $elm$core$Basics$always);
 var $mdgriffith$elm_ui$Element$html = $mdgriffith$elm_ui$Internal$Model$unstyled;
 var $mdgriffith$elm_ui$Internal$Model$OnlyDynamic = F2(
@@ -16413,10 +16629,6 @@ var $author$project$Sage$EPL2025$bur = A4($author$project$Sage$Plot$Team, 'BUR',
 var $author$project$Sage$EPL2025$che = A4($author$project$Sage$Plot$Team, 'CHE', 'Chelsea', 'Chelsea', '#034694');
 var $author$project$Sage$EPL2025$cry = A4($author$project$Sage$Plot$Team, 'CRY', 'Crystal Palace', 'Crystal Palace', '#FF0000');
 var $author$project$Sage$EPL2025$eve = A4($author$project$Sage$Plot$Team, 'EVE', 'Everton', 'Everton', '#003399');
-var $author$project$Sage$Plot$Match = F3(
-	function (host, opponent, result) {
-		return {host: host, opponent: opponent, result: result};
-	});
 var $author$project$Sage$Football$final = F4(
 	function (ht, hs, os, ot) {
 		return A3(
@@ -17033,7 +17245,7 @@ var $author$project$Sage$EPL2025$matches = _List_fromArray(
 				'2025-12-21',
 				_List_fromArray(
 					[
-						A2($author$project$Sage$Football$pending, $author$project$Sage$EPL2025$avl, $author$project$Sage$EPL2025$mun)
+						A4($author$project$Sage$Football$final, $author$project$Sage$EPL2025$avl, 2, 1, $author$project$Sage$EPL2025$mun)
 					])),
 				A3(
 				$author$project$Sage$Football$Day,
@@ -17112,8 +17324,11 @@ var $author$project$Sage$EPL2025$matches = _List_fromArray(
 					]))
 			]))
 	]);
+var $author$project$App$DecrementPredictedRounds = {$: 'DecrementPredictedRounds'};
 var $author$project$Sage$Plot$Flatter = {$: 'Flatter'};
-var $author$project$Sage$Football$PredictHostWins = {$: 'PredictHostWins'};
+var $author$project$App$IncrementPredictedRounds = {$: 'IncrementPredictedRounds'};
+var $author$project$App$PredictEvenOdds = {$: 'PredictEvenOdds'};
+var $author$project$App$PredictHostWins = {$: 'PredictHostWins'};
 var $author$project$App$SelectPredictor = function (a) {
 	return {$: 'SelectPredictor', a: a};
 };
@@ -17131,15 +17346,144 @@ var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
 };
 var $mdgriffith$elm_ui$Internal$Model$Top = {$: 'Top'};
 var $mdgriffith$elm_ui$Element$alignTop = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Top);
+var $mdgriffith$elm_ui$Internal$Model$Button = {$: 'Button'};
+var $mdgriffith$elm_ui$Internal$Model$Describe = function (a) {
+	return {$: 'Describe', a: a};
+};
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
+var $mdgriffith$elm_ui$Element$Input$enter = 'Enter';
 var $mdgriffith$elm_ui$Internal$Model$NoAttribute = {$: 'NoAttribute'};
+var $mdgriffith$elm_ui$Element$Input$hasFocusStyle = function (attr) {
+	if (((attr.$ === 'StyleClass') && (attr.b.$ === 'PseudoSelector')) && (attr.b.a.$ === 'Focus')) {
+		var _v1 = attr.b;
+		var _v2 = _v1.a;
+		return true;
+	} else {
+		return false;
+	}
+};
+var $mdgriffith$elm_ui$Element$Input$focusDefault = function (attrs) {
+	return A2($elm$core$List$any, $mdgriffith$elm_ui$Element$Input$hasFocusStyle, attrs) ? $mdgriffith$elm_ui$Internal$Model$NoAttribute : $mdgriffith$elm_ui$Internal$Model$htmlClass('focusable');
+};
+var $mdgriffith$elm_ui$Element$Events$onClick = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onClick);
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
+	});
+var $mdgriffith$elm_ui$Element$Input$onKeyLookup = function (lookup) {
+	var decode = function (code) {
+		var _v0 = lookup(code);
+		if (_v0.$ === 'Nothing') {
+			return $elm$json$Json$Decode$fail('No key matched');
+		} else {
+			var msg = _v0.a;
+			return $elm$json$Json$Decode$succeed(msg);
+		}
+	};
+	var isKey = A2(
+		$elm$json$Json$Decode$andThen,
+		decode,
+		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+	return $mdgriffith$elm_ui$Internal$Model$Attr(
+		A2(
+			$elm$html$Html$Events$preventDefaultOn,
+			'keydown',
+			A2(
+				$elm$json$Json$Decode$map,
+				function (fired) {
+					return _Utils_Tuple2(fired, true);
+				},
+				isKey)));
+};
+var $mdgriffith$elm_ui$Internal$Model$Class = F2(
+	function (a, b) {
+		return {$: 'Class', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$cursor = $mdgriffith$elm_ui$Internal$Flag$flag(21);
+var $mdgriffith$elm_ui$Element$pointer = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$cursor, $mdgriffith$elm_ui$Internal$Style$classes.cursorPointer);
+var $mdgriffith$elm_ui$Element$Input$space = ' ';
+var $elm$html$Html$Attributes$tabindex = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'tabIndex',
+		$elm$core$String$fromInt(n));
+};
+var $mdgriffith$elm_ui$Element$Input$button = F2(
+	function (attrs, _v0) {
+		var onPress = _v0.onPress;
+		var label = _v0.label;
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentCenterX + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.seButton + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.noTextSelection)))))),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$pointer,
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Element$Input$focusDefault(attrs),
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Button),
+									A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_ui$Internal$Model$Attr(
+											$elm$html$Html$Attributes$tabindex(0)),
+										function () {
+											if (onPress.$ === 'Nothing') {
+												return A2(
+													$elm$core$List$cons,
+													$mdgriffith$elm_ui$Internal$Model$Attr(
+														$elm$html$Html$Attributes$disabled(true)),
+													attrs);
+											} else {
+												var msg = onPress.a;
+												return A2(
+													$elm$core$List$cons,
+													$mdgriffith$elm_ui$Element$Events$onClick(msg),
+													A2(
+														$elm$core$List$cons,
+														$mdgriffith$elm_ui$Element$Input$onKeyLookup(
+															function (code) {
+																return _Utils_eq(code, $mdgriffith$elm_ui$Element$Input$enter) ? $elm$core$Maybe$Just(msg) : (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$space) ? $elm$core$Maybe$Just(msg) : $elm$core$Maybe$Nothing);
+															}),
+														attrs));
+											}
+										}()))))))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[label])));
+	});
 var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
 	return {$: 'AlignX', a: a};
 };
 var $mdgriffith$elm_ui$Internal$Model$Left = {$: 'Left'};
 var $mdgriffith$elm_ui$Element$alignLeft = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Left);
-var $mdgriffith$elm_ui$Internal$Model$Describe = function (a) {
-	return {$: 'Describe', a: a};
-};
 var $mdgriffith$elm_ui$Internal$Model$LivePolite = {$: 'LivePolite'};
 var $mdgriffith$elm_ui$Element$Region$announce = $mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$LivePolite);
 var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
@@ -17223,7 +17567,6 @@ var $mdgriffith$elm_ui$Element$Input$applyLabel = F3(
 var $elm$html$Html$Attributes$attribute = $elm$virtual_dom$VirtualDom$attribute;
 var $mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
 var $mdgriffith$elm_ui$Element$centerY = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$CenterY);
-var $mdgriffith$elm_ui$Element$Input$enter = 'Enter';
 var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
 	return {$: 'Fill', a: a};
 };
@@ -17247,50 +17590,6 @@ var $mdgriffith$elm_ui$Element$Input$isHiddenLabel = function (label) {
 		return false;
 	}
 };
-var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $elm$json$Json$Decode$fail = _Json_fail;
-var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
-	return {$: 'MayPreventDefault', a: a};
-};
-var $elm$html$Html$Events$preventDefaultOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
-	});
-var $mdgriffith$elm_ui$Element$Input$onKeyLookup = function (lookup) {
-	var decode = function (code) {
-		var _v0 = lookup(code);
-		if (_v0.$ === 'Nothing') {
-			return $elm$json$Json$Decode$fail('No key matched');
-		} else {
-			var msg = _v0.a;
-			return $elm$json$Json$Decode$succeed(msg);
-		}
-	};
-	var isKey = A2(
-		$elm$json$Json$Decode$andThen,
-		decode,
-		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
-	return $mdgriffith$elm_ui$Internal$Model$Attr(
-		A2(
-			$elm$html$Html$Events$preventDefaultOn,
-			'keydown',
-			A2(
-				$elm$json$Json$Decode$map,
-				function (fired) {
-					return _Utils_Tuple2(fired, true);
-				},
-				isKey)));
-};
-var $mdgriffith$elm_ui$Internal$Model$Class = F2(
-	function (a, b) {
-		return {$: 'Class', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$cursor = $mdgriffith$elm_ui$Internal$Flag$flag(21);
-var $mdgriffith$elm_ui$Element$pointer = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$cursor, $mdgriffith$elm_ui$Internal$Style$classes.cursorPointer);
-var $mdgriffith$elm_ui$Element$Input$space = ' ';
 var $mdgriffith$elm_ui$Internal$Model$SpacingStyle = F3(
 	function (a, b, c) {
 		return {$: 'SpacingStyle', a: a, b: b, c: c};
@@ -17309,12 +17608,6 @@ var $mdgriffith$elm_ui$Element$spacing = function (x) {
 			A2($mdgriffith$elm_ui$Internal$Model$spacingName, x, x),
 			x,
 			x));
-};
-var $elm$html$Html$Attributes$tabindex = function (n) {
-	return A2(
-		_VirtualDom_attribute,
-		'tabIndex',
-		$elm$core$String$fromInt(n));
 };
 var $mdgriffith$elm_ui$Element$Input$tabindex = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Attributes$tabindex);
 var $mdgriffith$elm_ui$Element$Input$checkbox = F2(
@@ -17696,47 +17989,91 @@ var $author$project$App$optionsView = function (model) {
 						$mdgriffith$elm_ui$Element$Input$checkbox,
 						_List_Nil,
 						{
-							checked: _Utils_eq(
-								model.predictor,
-								$elm$core$Maybe$Just($author$project$Sage$Football$PredictHostWins)),
-							icon: $mdgriffith$elm_ui$Element$Input$defaultCheckbox,
-							label: A2(
-								$mdgriffith$elm_ui$Element$Input$labelRight,
-								_List_Nil,
-								$mdgriffith$elm_ui$Element$text('Host Wins')),
-							onChange: $elm$core$Basics$always(
-								$author$project$App$SelectPredictor(
-									$elm$core$Maybe$Just($author$project$Sage$Football$PredictHostWins)))
-						}),
-						A2(
-						$mdgriffith$elm_ui$Element$Input$checkbox,
-						_List_Nil,
-						{
-							checked: _Utils_eq(
-								model.predictor,
-								$elm$core$Maybe$Just($author$project$Sage$Football$PredictEvenOdds)),
-							icon: $mdgriffith$elm_ui$Element$Input$defaultCheckbox,
-							label: A2(
-								$mdgriffith$elm_ui$Element$Input$labelRight,
-								_List_Nil,
-								$mdgriffith$elm_ui$Element$text('Even Odds')),
-							onChange: $elm$core$Basics$always(
-								$author$project$App$SelectPredictor(
-									$elm$core$Maybe$Just($author$project$Sage$Football$PredictEvenOdds)))
-						}),
-						A2(
-						$mdgriffith$elm_ui$Element$Input$checkbox,
-						_List_Nil,
-						{
-							checked: _Utils_eq(model.predictor, $elm$core$Maybe$Nothing),
+							checked: _Utils_eq(model.predictOption, $author$project$App$PredictNone),
 							icon: $mdgriffith$elm_ui$Element$Input$defaultCheckbox,
 							label: A2(
 								$mdgriffith$elm_ui$Element$Input$labelRight,
 								_List_Nil,
 								$mdgriffith$elm_ui$Element$text('None')),
 							onChange: $elm$core$Basics$always(
-								$author$project$App$SelectPredictor($elm$core$Maybe$Nothing))
-						})
+								$author$project$App$SelectPredictor($author$project$App$PredictNone))
+						}),
+						A2(
+						$mdgriffith$elm_ui$Element$Input$checkbox,
+						_List_Nil,
+						{
+							checked: _Utils_eq(model.predictOption, $author$project$App$PredictHostWins),
+							icon: $mdgriffith$elm_ui$Element$Input$defaultCheckbox,
+							label: A2(
+								$mdgriffith$elm_ui$Element$Input$labelRight,
+								_List_Nil,
+								$mdgriffith$elm_ui$Element$text('Host Wins')),
+							onChange: $elm$core$Basics$always(
+								$author$project$App$SelectPredictor($author$project$App$PredictHostWins))
+						}),
+						A2(
+						$mdgriffith$elm_ui$Element$Input$checkbox,
+						_List_Nil,
+						{
+							checked: _Utils_eq(model.predictOption, $author$project$App$PredictEvenOdds),
+							icon: $mdgriffith$elm_ui$Element$Input$defaultCheckbox,
+							label: A2(
+								$mdgriffith$elm_ui$Element$Input$labelRight,
+								_List_Nil,
+								$mdgriffith$elm_ui$Element$text('Even Odds')),
+							onChange: $elm$core$Basics$always(
+								$author$project$App$SelectPredictor($author$project$App$PredictEvenOdds))
+						}),
+						A2(
+						$mdgriffith$elm_ui$Element$Input$checkbox,
+						_List_Nil,
+						{
+							checked: _Utils_eq(model.predictOption, $author$project$App$PredictStatsFlat),
+							icon: $mdgriffith$elm_ui$Element$Input$defaultCheckbox,
+							label: A2(
+								$mdgriffith$elm_ui$Element$Input$labelRight,
+								_List_Nil,
+								$mdgriffith$elm_ui$Element$text('Statistical: flat')),
+							onChange: $elm$core$Basics$always(
+								$author$project$App$SelectPredictor($author$project$App$PredictStatsFlat))
+						}),
+						A2(
+						$mdgriffith$elm_ui$Element$row,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$spacing(8)
+							]),
+						_Utils_eq(model.predictOption, $author$project$App$PredictNone) ? _List_Nil : _List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Element$Input$button,
+								_List_Nil,
+								{
+									label: A2(
+										$mdgriffith$elm_ui$Element$row,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$text('-')
+											])),
+									onPress: (model.predictRounds > 0) ? $elm$core$Maybe$Just($author$project$App$DecrementPredictedRounds) : $elm$core$Maybe$Nothing
+								}),
+								$mdgriffith$elm_ui$Element$text(
+								$elm$core$String$fromInt(model.predictRounds)),
+								A2(
+								$mdgriffith$elm_ui$Element$Input$button,
+								_List_Nil,
+								{
+									label: A2(
+										$mdgriffith$elm_ui$Element$row,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$text('+')
+											])),
+									onPress: $elm$core$Maybe$Just($author$project$App$IncrementPredictedRounds)
+								})
+							]))
 					])),
 				A2(
 				$mdgriffith$elm_ui$Element$column,
@@ -17791,15 +18128,6 @@ var $author$project$App$optionsView = function (model) {
 					]))
 			]));
 };
-var $elm$core$Maybe$andThen = F2(
-	function (callback, maybeValue) {
-		if (maybeValue.$ === 'Just') {
-			var value = maybeValue.a;
-			return callback(value);
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
 var $terezka$elm_charts$Internal$Helpers$Attribute = function (a) {
 	return {$: 'Attribute', a: a};
 };
@@ -21790,21 +22118,6 @@ var $terezka$elm_charts$Internal$Svg$interpolation = F5(
 					A4($terezka$elm_charts$Internal$Svg$toCommands, method, toX, toY, data)));
 		}
 	});
-var $elm$core$Maybe$map2 = F3(
-	function (func, ma, mb) {
-		if (ma.$ === 'Nothing') {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var a = ma.a;
-			if (mb.$ === 'Nothing') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var b = mb.a;
-				return $elm$core$Maybe$Just(
-					A2(func, a, b));
-			}
-		}
-	});
 var $elm$html$Html$table = _VirtualDom_node('table');
 var $terezka$elm_charts$Internal$Produce$toDefaultName = F2(
 	function (ids, name) {
@@ -25235,11 +25548,11 @@ var $author$project$Sage$Plot$plot = F6(
 								options.minRound)),
 							A2(
 							$elm$core$Maybe$withDefault,
-							A2($terezka$elm_charts$Chart$Attributes$highest, 19, $terezka$elm_charts$Chart$Attributes$orHigher),
+							A2($terezka$elm_charts$Chart$Attributes$highest, 19.5, $terezka$elm_charts$Chart$Attributes$orHigher),
 							A2(
 								$elm$core$Maybe$map,
 								function (r) {
-									return A2($terezka$elm_charts$Chart$Attributes$highest, r, $terezka$elm_charts$Chart$Attributes$exactly);
+									return A2($terezka$elm_charts$Chart$Attributes$highest, r + 0.5, $terezka$elm_charts$Chart$Attributes$exactly);
 								},
 								options.maxRound))
 						])),
@@ -25294,25 +25607,19 @@ var $author$project$Sage$Plot$Final = function (a) {
 	return {$: 'Final', a: a};
 };
 var $author$project$Sage$Football$applyPredictor = F2(
-	function (predictor, _v0) {
-		var host = _v0.host;
-		var opponent = _v0.opponent;
-		var result = _v0.result;
+	function (predictor, match) {
 		var predicted = function () {
-			if (result.$ === 'Just') {
-				var goals = result.a;
+			var _v0 = match.result;
+			if (_v0.$ === 'Just') {
+				var goals = _v0.a;
 				return $author$project$Sage$Plot$Final(goals);
 			} else {
-				if (predictor.$ === 'PredictHostWins') {
-					return $author$project$Sage$Plot$Projected(
-						{draw: 0.0, lose: 0.0, win: 1.0});
-				} else {
-					return $author$project$Sage$Plot$Projected(
-						{draw: 0.33, lose: 0.33, win: 0.33});
-				}
+				return $author$project$Sage$Plot$Projected(
+					predictor(
+						A2($author$project$Sage$Football$withResult, _Utils_Tuple0, match)));
 			}
 		}();
-		return A3($author$project$Sage$Plot$Match, host, opponent, predicted);
+		return A2($author$project$Sage$Football$withResult, predicted, match);
 	});
 var $author$project$Sage$Football$hostPoints = function (_v0) {
 	var host = _v0.host;
@@ -25490,6 +25797,16 @@ var $author$project$Sage$Football$toScores = F2(
 	});
 var $author$project$App$view = function (model) {
 	var season = $author$project$Sage$EPL2025$matches;
+	var numRounds = A2(
+		$elm$core$Maybe$withDefault,
+		19,
+		A2(
+			$elm$core$Maybe$map,
+			function ($) {
+				return $.number;
+			},
+			$elm$core$List$head(
+				$elm$core$List$reverse(season))));
 	var options = function () {
 		var _v3 = function () {
 			if (model.recentOnly) {
@@ -25497,7 +25814,10 @@ var $author$project$App$view = function (model) {
 				return _Utils_Tuple2(
 					$elm$core$Maybe$Just(cur - 5),
 					$elm$core$Maybe$Just(
-						A2($elm$core$Basics$min, 19, cur + 3)));
+						A2(
+							$elm$core$Basics$min,
+							numRounds,
+							cur + (_Utils_eq(model.predictOption, $author$project$App$PredictNone) ? 0 : model.predictRounds))));
 			} else {
 				return _Utils_Tuple2($elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing);
 			}
@@ -25515,29 +25835,40 @@ var $author$project$App$view = function (model) {
 		}
 	};
 	var scores = function () {
-		var _v0 = model.predictor;
-		if (_v0.$ === 'Nothing') {
-			return A2(
-				$elm$core$List$map,
-				function (_v1) {
-					var t = _v1.a;
-					var rs = _v1.b;
-					return _Utils_Tuple2(
-						t,
-						A2(
-							$elm$core$Array$filter,
+		var _v0 = model.predictOption;
+		switch (_v0.$) {
+			case 'PredictNone':
+				return A2(
+					$elm$core$List$map,
+					function (_v1) {
+						var t = _v1.a;
+						var rs = _v1.b;
+						return _Utils_Tuple2(
+							t,
 							A2(
-								$elm$core$Basics$composeR,
-								function ($) {
-									return $.match;
-								},
-								isPlayed),
-							rs));
-				},
-				A2($author$project$Sage$Football$toScores, $author$project$Sage$Football$PredictEvenOdds, season));
-		} else {
-			var predictor = _v0.a;
-			return A2($author$project$Sage$Football$toScores, predictor, season);
+								$elm$core$Array$filter,
+								A2(
+									$elm$core$Basics$composeR,
+									function ($) {
+										return $.match;
+									},
+									isPlayed),
+								rs));
+					},
+					A2($author$project$Sage$Football$toScores, $author$project$Sage$Predict$evenOdds, season));
+			case 'PredictHostWins':
+				return A2($author$project$Sage$Football$toScores, $author$project$Sage$Predict$hostWins, season);
+			case 'PredictEvenOdds':
+				return A2($author$project$Sage$Football$toScores, $author$project$Sage$Predict$evenOdds, season);
+			default:
+				return A2(
+					$author$project$Sage$Football$toScores,
+					A3(
+						$author$project$Sage$Predict$flatStats,
+						5,
+						$author$project$Sage$Predict$evenOdds,
+						$author$project$Sage$Predict$flatMatches(season)),
+					season);
 		}
 	}();
 	return A2(
@@ -25585,7 +25916,7 @@ var $author$project$App$view = function (model) {
 var $author$project$App$main = $elm$browser$Browser$sandbox(
 	{init: $author$project$App$init, update: $author$project$App$update, view: $author$project$App$view});
 _Platform_export({'App':{'init':$author$project$App$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"App.Msg","aliases":{"Chart.Item.Dot":{"args":[],"type":"Internal.Svg.Dot"},"Internal.Svg.Dot":{"args":[],"type":"{ color : String.String, opacity : Basics.Float, size : Basics.Float, border : String.String, borderWidth : Basics.Float, borderOpacity : Basics.Float, highlight : Basics.Float, highlightWidth : Basics.Float, highlightColor : String.String, shape : Maybe.Maybe Internal.Svg.Shape, hideOverflow : Basics.Bool }"},"Sage.Plot.Dot":{"args":[],"type":"Chart.Item.One ( Basics.Int, Sage.Plot.Team ) Chart.Item.Dot"},"Internal.Property.Identification":{"args":[],"type":"{ stackIndex : Basics.Int, seriesIndex : Basics.Int, absoluteIndex : Basics.Int, dataIndex : Basics.Int, elementIndex : Basics.Int }"},"Chart.Item.One":{"args":["data","x"],"type":"Internal.Item.One data x"},"Internal.Item.One":{"args":["data","x"],"type":"Internal.Item.Rendered { presentation : x, color : String.String, datum : data, x1 : Basics.Float, x2 : Basics.Float, y : Basics.Float, isReal : Basics.Bool, tooltipText : String.String, name : Maybe.Maybe String.String, identification : Internal.Property.Identification, toAny : x -> Internal.Item.Any }"},"Sage.Plot.Team":{"args":[],"type":"{ shortName : Sage.Plot.TeamId, name : String.String, longName : String.String, color : String.String }"},"Sage.Plot.TeamId":{"args":[],"type":"String.String"},"Svg.Attribute":{"args":["msg"],"type":"VirtualDom.Attribute msg"},"Internal.Coordinates.Axis":{"args":[],"type":"{ length : Basics.Float, marginMin : Basics.Float, marginMax : Basics.Float, dataMin : Basics.Float, dataMax : Basics.Float, min : Basics.Float, max : Basics.Float, flip : Basics.Bool }"},"Internal.Svg.Bar":{"args":[],"type":"{ roundTop : Basics.Float, roundBottom : Basics.Float, color : String.String, border : String.String, borderWidth : Basics.Float, opacity : Basics.Float, design : Maybe.Maybe Internal.Svg.Design, attrs : List.List (Svg.Attribute Basics.Never), highlight : Basics.Float, highlightWidth : Basics.Float, highlightColor : String.String }"},"Html.Html":{"args":["msg"],"type":"VirtualDom.Node msg"},"Internal.Coordinates.Limits":{"args":[],"type":"Internal.Coordinates.Position"},"Internal.Coordinates.Plane":{"args":[],"type":"{ x : Internal.Coordinates.Axis, y : Internal.Coordinates.Axis }"},"Internal.Coordinates.Position":{"args":[],"type":"{ x1 : Basics.Float, x2 : Basics.Float, y1 : Basics.Float, y2 : Basics.Float }"},"Svg.Svg":{"args":["msg"],"type":"VirtualDom.Node msg"},"Internal.Svg.Pattern":{"args":[],"type":"{ color : String.String, width : Basics.Float, spacing : Basics.Float, rotate : Basics.Float }"}},"unions":{"App.Msg":{"args":[],"tags":{"OnHover":["List.List Sage.Plot.Dot"],"SelectPredictor":["Maybe.Maybe Sage.Football.Predictor"],"SelectStyle":["Sage.Plot.Style"],"SelectTaller":["Basics.Bool"],"SelectRecentOnly":["Basics.Bool"]}},"Internal.Item.Any":{"args":[],"tags":{"Dot":["Internal.Svg.Dot"],"Bar":["Internal.Svg.Bar"],"Custom":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Sage.Football.Predictor":{"args":[],"tags":{"PredictHostWins":[],"PredictEvenOdds":[]}},"Internal.Item.Rendered":{"args":["meta"],"tags":{"Rendered":["meta","{ limits : Internal.Coordinates.Limits, position : Internal.Coordinates.Position, localPlane : Internal.Coordinates.Plane, limitsTop : Internal.Coordinates.Limits, positionTop : Internal.Coordinates.Position, planeTop : Internal.Coordinates.Plane, render : () -> Svg.Svg Basics.Never, tooltip : () -> List.List (Html.Html Basics.Never) }"]}},"Internal.Svg.Shape":{"args":[],"tags":{"Circle":[],"Triangle":[],"Square":[],"Diamond":[],"Cross":[],"Plus":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Sage.Plot.Style":{"args":[],"tags":{"Simple":[],"Flatter":[]}},"VirtualDom.Attribute":{"args":["msg"],"tags":{"Attribute":[]}},"Internal.Svg.Design":{"args":[],"tags":{"Striped":["List.List (Internal.Helpers.Attribute Internal.Svg.Pattern)"],"Dotted":["List.List (Internal.Helpers.Attribute Internal.Svg.Pattern)"],"Gradient":["List.List String.String"]}},"Basics.Never":{"args":[],"tags":{"JustOneMore":["Basics.Never"]}},"VirtualDom.Node":{"args":["msg"],"tags":{"Node":[]}},"Internal.Helpers.Attribute":{"args":["c"],"tags":{"Attribute":["c -> c"]}}}}})}});}(this));
+	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"App.Msg","aliases":{"Chart.Item.Dot":{"args":[],"type":"Internal.Svg.Dot"},"Internal.Svg.Dot":{"args":[],"type":"{ color : String.String, opacity : Basics.Float, size : Basics.Float, border : String.String, borderWidth : Basics.Float, borderOpacity : Basics.Float, highlight : Basics.Float, highlightWidth : Basics.Float, highlightColor : String.String, shape : Maybe.Maybe Internal.Svg.Shape, hideOverflow : Basics.Bool }"},"Sage.Plot.Dot":{"args":[],"type":"Chart.Item.One ( Basics.Int, Sage.Plot.Team ) Chart.Item.Dot"},"Internal.Property.Identification":{"args":[],"type":"{ stackIndex : Basics.Int, seriesIndex : Basics.Int, absoluteIndex : Basics.Int, dataIndex : Basics.Int, elementIndex : Basics.Int }"},"Chart.Item.One":{"args":["data","x"],"type":"Internal.Item.One data x"},"Internal.Item.One":{"args":["data","x"],"type":"Internal.Item.Rendered { presentation : x, color : String.String, datum : data, x1 : Basics.Float, x2 : Basics.Float, y : Basics.Float, isReal : Basics.Bool, tooltipText : String.String, name : Maybe.Maybe String.String, identification : Internal.Property.Identification, toAny : x -> Internal.Item.Any }"},"Sage.Plot.Team":{"args":[],"type":"{ shortName : Sage.Plot.TeamId, name : String.String, longName : String.String, color : String.String }"},"Sage.Plot.TeamId":{"args":[],"type":"String.String"},"Svg.Attribute":{"args":["msg"],"type":"VirtualDom.Attribute msg"},"Internal.Coordinates.Axis":{"args":[],"type":"{ length : Basics.Float, marginMin : Basics.Float, marginMax : Basics.Float, dataMin : Basics.Float, dataMax : Basics.Float, min : Basics.Float, max : Basics.Float, flip : Basics.Bool }"},"Internal.Svg.Bar":{"args":[],"type":"{ roundTop : Basics.Float, roundBottom : Basics.Float, color : String.String, border : String.String, borderWidth : Basics.Float, opacity : Basics.Float, design : Maybe.Maybe Internal.Svg.Design, attrs : List.List (Svg.Attribute Basics.Never), highlight : Basics.Float, highlightWidth : Basics.Float, highlightColor : String.String }"},"Html.Html":{"args":["msg"],"type":"VirtualDom.Node msg"},"Internal.Coordinates.Limits":{"args":[],"type":"Internal.Coordinates.Position"},"Internal.Coordinates.Plane":{"args":[],"type":"{ x : Internal.Coordinates.Axis, y : Internal.Coordinates.Axis }"},"Internal.Coordinates.Position":{"args":[],"type":"{ x1 : Basics.Float, x2 : Basics.Float, y1 : Basics.Float, y2 : Basics.Float }"},"Svg.Svg":{"args":["msg"],"type":"VirtualDom.Node msg"},"Internal.Svg.Pattern":{"args":[],"type":"{ color : String.String, width : Basics.Float, spacing : Basics.Float, rotate : Basics.Float }"}},"unions":{"App.Msg":{"args":[],"tags":{"OnHover":["List.List Sage.Plot.Dot"],"SelectPredictor":["App.PredictOption"],"IncrementPredictedRounds":[],"DecrementPredictedRounds":[],"SelectStyle":["Sage.Plot.Style"],"SelectTaller":["Basics.Bool"],"SelectRecentOnly":["Basics.Bool"]}},"Internal.Item.Any":{"args":[],"tags":{"Dot":["Internal.Svg.Dot"],"Bar":["Internal.Svg.Bar"],"Custom":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"App.PredictOption":{"args":[],"tags":{"PredictNone":[],"PredictHostWins":[],"PredictEvenOdds":[],"PredictStatsFlat":[]}},"Internal.Item.Rendered":{"args":["meta"],"tags":{"Rendered":["meta","{ limits : Internal.Coordinates.Limits, position : Internal.Coordinates.Position, localPlane : Internal.Coordinates.Plane, limitsTop : Internal.Coordinates.Limits, positionTop : Internal.Coordinates.Position, planeTop : Internal.Coordinates.Plane, render : () -> Svg.Svg Basics.Never, tooltip : () -> List.List (Html.Html Basics.Never) }"]}},"Internal.Svg.Shape":{"args":[],"tags":{"Circle":[],"Triangle":[],"Square":[],"Diamond":[],"Cross":[],"Plus":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Sage.Plot.Style":{"args":[],"tags":{"Simple":[],"Flatter":[]}},"VirtualDom.Attribute":{"args":["msg"],"tags":{"Attribute":[]}},"Internal.Svg.Design":{"args":[],"tags":{"Striped":["List.List (Internal.Helpers.Attribute Internal.Svg.Pattern)"],"Dotted":["List.List (Internal.Helpers.Attribute Internal.Svg.Pattern)"],"Gradient":["List.List String.String"]}},"Basics.Never":{"args":[],"tags":{"JustOneMore":["Basics.Never"]}},"VirtualDom.Node":{"args":["msg"],"tags":{"Node":[]}},"Internal.Helpers.Attribute":{"args":["c"],"tags":{"Attribute":["c -> c"]}}}}})}});}(this));
 
   var app = Elm.App.init({ node: document.getElementById("elm") });
 }
