@@ -395,8 +395,8 @@ plot onHover options width height data hovering =
                 |> Maybe.map (\r -> CA.lowest (toFloat r) CA.exactly)
                 |> Maybe.withDefault (CA.lowest 1 CA.orLower)
             , options.maxRound
-                |> Maybe.map (\r -> CA.highest (toFloat r) CA.exactly)
-                |> Maybe.withDefault (CA.highest 19 CA.orHigher)
+                |> Maybe.map (\r -> CA.highest (toFloat r + 0.5) CA.exactly)
+                |> Maybe.withDefault (CA.highest 19.5 CA.orHigher)
             ]
 
         -- , CA.domain [ CA.lowest 0 CA.orLower, CA.highest 40 CA.orHigher ]

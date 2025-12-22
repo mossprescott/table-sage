@@ -2,9 +2,9 @@ module App exposing (..)
 
 import Array
 import Browser
-import Element exposing (Element, alignTop, column, el, paddingXY, row, spacing, text)
+import Element exposing (Element, alignTop, column, el, row, spacing, text)
 import Element.Font as Font
-import Element.Input exposing (checkbox, defaultCheckbox, labelRight)
+import Element.Input exposing (button, checkbox, defaultCheckbox, labelRight)
 import Html exposing (Html)
 import Sage.EPL2025 as EPL2025
 import Sage.Football exposing (Predictor(..), currentRound, toScores)
@@ -23,6 +23,7 @@ main =
 type alias Model =
     { hovering : List Dot
     , predictor : Maybe Predictor
+    , predictRounds : Int
     , style : Style
     , taller : Bool
     , recentOnly : Bool
@@ -33,6 +34,7 @@ init : Model
 init =
     { hovering = []
     , predictor = Just PredictEvenOdds
+    , predictRounds = 2
     , style = Simple
     , taller = False
     , recentOnly = True
@@ -45,6 +47,8 @@ type Msg
     | SelectStyle Style
     | SelectTaller Bool
     | SelectRecentOnly Bool
+    | IncrementPredictedRounds
+    | DecrementPredictedRounds
 
 
 update : Msg -> Model -> Model
@@ -64,6 +68,12 @@ update msg model =
 
         SelectRecentOnly recentOnly ->
             { model | recentOnly = recentOnly }
+
+        IncrementPredictedRounds ->
+            { model | predictRounds = model.predictRounds + 1 }
+
+        DecrementPredictedRounds ->
+            { model | predictRounds = model.predictRounds - 1 }
 
 
 plotWidth : Int
@@ -85,6 +95,13 @@ view model =
     let
         season =
             EPL2025.matches
+
+        numRounds =
+            season
+                |> List.reverse
+                |> List.head
+                |> Maybe.map .number
+                |> Maybe.withDefault 19
 
         isPlayed match =
             case match.result of
@@ -113,7 +130,18 @@ view model =
                             cur =
                                 currentRound season
                         in
-                        ( Just (cur - 5), Just (cur + 3 |> min 19) )
+                        ( Just (cur - 5)
+                        , Just
+                            (cur
+                                + (if model.predictor == Nothing then
+                                    0
+
+                                   else
+                                    model.predictRounds
+                                  )
+                                |> min numRounds
+                            )
+                        )
 
                     else
                         ( Nothing, Nothing )
@@ -121,8 +149,8 @@ view model =
             { style = model.style
             , minRound = minRound
             , maxRound = maxRound
-            , dayXOffset = 1/5
-            , matchXOffset = 1/25
+            , dayXOffset = 1 / 5
+            , matchXOffset = 1 / 25
             }
     in
     Element.layout [] <|
@@ -182,6 +210,29 @@ optionsView model =
                 , checked = model.predictor == Nothing
                 , label = labelRight [] (text "None")
                 }
+            , row [ spacing 8 ] <|
+                if model.predictor == Nothing then
+                    []
+
+                else
+                    [ button
+                        []
+                        { label = row [] [ text "-" ]
+                        , onPress =
+                            -- Note: predicting 0 rounds means predict remaining matches in the current round
+                            if model.predictRounds > 0 then
+                                Just DecrementPredictedRounds
+
+                            else
+                                Nothing
+                        }
+                    , text (String.fromInt model.predictRounds)
+                    , button
+                        []
+                        { label = row [] [ text "+" ]
+                        , onPress = Just IncrementPredictedRounds
+                        }
+                    ]
             ]
         , column
             [ spacing 10
