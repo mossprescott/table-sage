@@ -37,7 +37,8 @@ type PredictOption
     | PredictEvenOdds
       -- |Predict on the basis of each teams' results, each result considered equally
     | PredictStatsFlat
-
+    -- |Predict on flat average of each teams' record for home or away
+    | PredictStatsHomeAndAway
 
 init : Model
 init =
@@ -136,7 +137,11 @@ view model =
 
                 PredictStatsFlat ->
                     season
-                        |> toScores (Predict.flatStats 5 Predict.evenOdds (Predict.flatMatches season))
+                        |> toScores (Predict.flat 5 Predict.evenOdds (Predict.flatMatches season))
+
+                PredictStatsHomeAndAway ->
+                    season
+                        |> toScores (Predict.homeAndAway 3 Predict.evenOdds (Predict.flatMatches season))
 
         options =
             let
@@ -231,6 +236,12 @@ optionsView model =
                 , icon = defaultCheckbox
                 , checked = model.predictOption == PredictStatsFlat
                 , label = labelRight [] (text "Statistical: flat")
+                }
+            , checkbox []
+                { onChange = always (SelectPredictor PredictStatsHomeAndAway)
+                , icon = defaultCheckbox
+                , checked = model.predictOption == PredictStatsHomeAndAway
+                , label = labelRight [] (text "Statistical: home and away")
                 }
             , row [ spacing 8 ] <|
                 if model.predictOption == PredictNone then
