@@ -42,11 +42,11 @@ opponentResult { host, opponent } =
 percentages for each side.
 
 Note: when partially applied, statistics are constructed just once and then predicting each result
-only takes a handful of simple lookups. FIXME: uh, refactor so that's true)
+only takes a handful of simple lookups. FIXME: uh, refactor so that's true.
 
 -}
 flatStats : Int -> Predictor () -> List (Match Goals) -> Predictor result
-flatStats minPlayed fallback history match =
+flatStats minPlayed fallback history =
     let
         stats : Dict TeamId { win : Int, lose : Int, draw : Int }
         stats =
@@ -90,19 +90,21 @@ flatStats minPlayed fallback history match =
 
             else
                 Nothing
-
-        hostStats f =
-            stats |> Dict.get match.host.shortName |> Maybe.andThen (apply f)
-
-        opponentStats f =
-            stats |> Dict.get match.opponent.shortName |> Maybe.andThen (apply f)
-
-        mean x y =
-            (x + y) / 2
-
-        orElse f =
-            Maybe.withDefault (fallback (match |> withResult ()) |> f)
     in
+    \match ->
+        let
+            hostStats f =
+                stats |> Dict.get match.host.shortName |> Maybe.andThen (apply f)
+
+            opponentStats f =
+                stats |> Dict.get match.opponent.shortName |> Maybe.andThen (apply f)
+
+            mean x y =
+                (x + y) / 2
+
+            orElse f =
+                Maybe.withDefault (fallback (match |> withResult ()) |> f)
+        in
         { win = Maybe.map2 mean (hostStats .win) (opponentStats .lose) |> orElse .win
         , lose = Maybe.map2 mean (hostStats .lose) (opponentStats .win) |> orElse .lose
         , draw = Maybe.map2 mean (hostStats .draw) (opponentStats .draw) |> orElse .draw
