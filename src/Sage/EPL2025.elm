@@ -446,7 +446,7 @@ matches =
             ]
         , Day "Monday"
             "2025-12-22"
-            [ pending ful nfo ]
+            [ final ful 1 0 nfo ]
         ]
     , Round 18
         [ Day "Friday"
