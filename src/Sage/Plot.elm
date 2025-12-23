@@ -150,12 +150,7 @@ styledTeam field team =
 scoreView : Int -> Team -> Score -> List (Html Never)
 scoreView round team s =
     [ Html.div []
-        [ Html.span []
-            [ styledTeam .name team
-            , Html.text <| ": " ++ FN.format pointsLocale s.total ++ " after " ++ String.fromInt round ++ " rounds"
-            ]
-        , Html.br [] []
-        , styledTeam .shortName s.match.host
+        [ styledTeam .shortName s.match.host
         , Html.span []
             [ case s.match.result of
                 Final goals ->
@@ -183,7 +178,11 @@ scoreView round team s =
                         )
             ]
         , styledTeam .shortName s.match.opponent
-        ]
+        , Html.br [] []
+        , Html.text <| "Round " ++ String.fromInt round
+        , Html.br [] []
+        , Html.span [] [ styledTeam .name team ]
+        , Html.text <| " " ++ FN.format pointsLocale s.total   ]
     ]
 
 
