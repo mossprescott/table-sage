@@ -111,7 +111,7 @@ view model =
                 |> List.reverse
                 |> List.head
                 |> Maybe.map .number
-                |> Maybe.withDefault 19
+                |> Maybe.withDefault 38
 
         isPlayed match =
             case match.result of

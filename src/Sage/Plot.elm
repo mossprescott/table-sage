@@ -296,7 +296,7 @@ plot onHover options width height data hovering =
 
         rounds : Team -> Array Score -> Element msg
         rounds team scores =
-            List.range 1 19
+            List.range 1 38
                 |> List.map (\r -> ( r, team ))
                 |> C.series toX
                     [ C.interpolatedMaybe
