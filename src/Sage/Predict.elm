@@ -130,6 +130,12 @@ flat minPlayed fallback history =
             orElse f =
                 Maybe.withDefault (fallback (match |> withResult ()) |> f)
         in
+        -- Debug.log
+        --     (String.join "\n"
+        --         [ match.host.name ++ ": " ++ Debug.toString (stats |> Dict.get match.host.shortName)
+        --         , match.opponent.name ++ ": " ++ Debug.toString (stats |> Dict.get match.opponent.shortName)
+        --         ]
+        --     )
         { win = Maybe.map2 mean (hostStats .win) (opponentStats .lose) |> orElse .win
         , lose = Maybe.map2 mean (hostStats .lose) (opponentStats .win) |> orElse .lose
         , draw = Maybe.map2 mean (hostStats .draw) (opponentStats .draw) |> orElse .draw
@@ -140,7 +146,7 @@ flat minPlayed fallback history =
 percentages for each side.
 
 Note: when partially applied, statistics are constructed just once and then predicting each result
-only takes a handful of simple lookups. FIXME: uh, refactor so that's true.
+only takes a handful of simple lookups.
 
 -}
 homeAndAway : Int -> Predictor () -> List (Match Goals) -> Predictor result
@@ -193,6 +199,12 @@ homeAndAway minPlayed fallback history =
             orElse f =
                 Maybe.withDefault (fallback (match |> withResult ()) |> f)
         in
+        -- Debug.log
+        --     (String.join "\n"
+        --         [ "MCI: " ++ Debug.toString (stats |> Dict.get "MCI")
+        --         , "SUN: " ++ Debug.toString (stats |> Dict.get "SUN")
+        --         ]
+        --     )
         { win = Maybe.map2 mean (hostStats .win) (opponentStats .lose) |> orElse .win
         , lose = Maybe.map2 mean (hostStats .lose) (opponentStats .win) |> orElse .lose
         , draw = Maybe.map2 mean (hostStats .draw) (opponentStats .draw) |> orElse .draw

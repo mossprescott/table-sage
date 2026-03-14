@@ -221,12 +221,12 @@ toScores predict season =
             season
                 |> List.map (match team)
                 |> List.foldl
-                    (\mm ( prevTotal, res ) ->
+                    (\mm ( (prevTotal, prevMin, prevMax), res ) ->
                         case mm of
                             Nothing ->
                                 -- Tricky: if there's a missing round, inject a bogus match so we don't end up with a
                                 -- mismatch in the "matrix" of results.
-                                ( prevTotal, Score (Match team team (Projected (Odds 0 0 0))) prevTotal ( 0, 0 ) :: res )
+                                ( (prevTotal, prevMin, prevMax), Score (Match team team (Projected (Odds 0 0 0))) prevTotal prevMin prevMax ( 0, 0 ) :: res )
 
                             Just ( m, sch ) ->
                                 let
@@ -239,10 +239,14 @@ toScores predict season =
 
                                     total =
                                         prevTotal + pts
+
+                                    (minP, maxP) = case m.result of
+                                        Just _ -> (total, total)
+                                        Nothing -> (prevMin, prevMax + 3.0)
                                 in
-                                ( total, Score result total sch :: res )
+                                ( (total, minP, maxP), Score result total minP maxP sch :: res )
                     )
-                    ( 0.0, [] )
+                    ( (0.0, 0.0, 0.0), [] )
                 |> Tuple.second
                 |> List.reverse
                 |> Array.fromList

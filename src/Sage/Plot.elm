@@ -73,7 +73,15 @@ type Result
 -}
 type alias Score =
     { match : Match Result
+
+    -- | Accumulated points as of a particular round, either actual or projected
     , total : Float
+
+    -- | Minumum possible points, assuming all future games are lost
+    , minPossible : Float
+
+    -- | Maxumum possible points, assuming all future games are won
+    , maxPossible : Float
 
     -- |Match scheduling hint, which indicates what day of the round and what position in the day's
     -- sequence of matches this match occurs.
@@ -182,7 +190,8 @@ scoreView round team s =
         , Html.text <| "Round " ++ String.fromInt round
         , Html.br [] []
         , Html.span [] [ styledTeam .name team ]
-        , Html.text <| " " ++ FN.format pointsLocale s.total   ]
+        , Html.text <| " " ++ FN.format pointsLocale s.total
+        ]
     ]
 
 
@@ -209,19 +218,19 @@ plot onHover options width height data hovering =
                         Nothing ->
                             [ t.shortName ]
             in
-            if hovering == [] then
-                data
-                    |> List.map
-                        (Tuple.first >> .shortName)
-                    |> Set.fromList
+            -- if hovering == [] then
+            --     data
+            --         |> List.map
+            --             (Tuple.first >> .shortName)
+            --         |> Set.fromList
+            -- else
+            hovering
+                |> List.map CI.getData
+                |> List.concatMap dotTeams
+                |> Set.fromList
 
-            else
-                hovering
-                    |> List.map CI.getData
-                    |> List.concatMap dotTeams
-                    |> Set.fromList
-
-        -- Subset of teams' data to display
+        -- Subset of teams' data to display, sorted so that any focused teams are rendered last
+        -- (on top).
         displayed =
             --data |> List.filter (Tuple.first >> .shortName >> (\n -> Set.member n focusedTeams))
             data
@@ -234,17 +243,17 @@ plot onHover options width height data hovering =
                             0
                     )
 
-        toY : Array Score -> Int -> Maybe Float
-        toY scores round =
+        toY : (Score -> Float) -> Array Score -> Int -> Maybe Float
+        toY field scores round =
             scores
                 |> Array.get (round - 1)
                 |> Maybe.map
                     (\s ->
                         if options.style == Flatter then
-                            s.total - toFloat round
+                            field s - toFloat round
 
                         else
-                            s.total
+                            field s
                     )
 
         toX : ( Int, Team ) -> Float
@@ -262,7 +271,7 @@ plot onHover options width height data hovering =
 
         -- Color for the team's scores, based on display state (focused or not)
         teamDisplayColor team =
-            if Set.member team.shortName focusedTeams then
+            if Set.isEmpty focusedTeams || Set.member team.shortName focusedTeams then
                 team.color
 
             else
@@ -294,13 +303,30 @@ plot onHover options width height data hovering =
                     , CA.borderWidth 0.5
                     ]
 
-        rounds : Team -> Array Score -> Element msg
-        rounds team scores =
+        spreadRounds : ( Team, Array Score ) -> Element msg
+        spreadRounds ( team, scores ) =
+            List.range 1 38
+                |> List.map (\r -> ( r, team ))
+                |> C.series toX
+                    [ C.stacked
+                        [ C.interpolatedMaybe
+                            (Tuple.first >> (\r -> Maybe.map2 (-) (toY .maxPossible scores r) (toY .minPossible scores r)))
+                            []
+                            []
+                        , C.interpolatedMaybe
+                            (Tuple.first >> toY .minPossible scores)
+                            [ CA.opacity 0.0 ]
+                            []
+                        ]
+                    ]
+
+        rounds : ( Team, Array Score ) -> Element msg
+        rounds ( team, scores ) =
             List.range 1 38
                 |> List.map (\r -> ( r, team ))
                 |> C.series toX
                     [ C.interpolatedMaybe
-                        (Tuple.first >> toY scores)
+                        (Tuple.first >> toY .total scores)
                         (lineAttrs team)
                         (commonDotAttrs team)
                         |> C.variation
@@ -408,7 +434,8 @@ plot onHover options width height data hovering =
 
         -- , C.yLabels [ CA.withGrid, CA.fontSize 12 ]
         ]
-            ++ List.map (\( t, ss ) -> rounds t ss) displayed
+            ++ List.map spreadRounds (displayed |> List.filter (\( t, _ ) -> Set.member t.shortName focusedTeams))
+            ++ List.map rounds displayed
             ++ [ C.each hovering tooltip
                , C.eachDot legendTip
 
