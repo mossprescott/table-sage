@@ -705,14 +705,14 @@ matches =
             ]
         , Day "Sunday"
             "2026-03-15"
-            [ pending cry lee
-            , pending mun avl
-            , pending nfo ful
-            , pending liv tot
+            [ final cry 0 0 lee
+            , final mun 3 1 avl
+            , final nfo 0 0 ful
+            , final liv 1 1 tot
             ]
         , Day "Monday"
             "2026-03-16"
-            [ pending bre wol
+            [ final bre 2 2 wol
             ]
         ]
     , Round 31
@@ -722,13 +722,13 @@ matches =
             ]
         , Day "Friday"
             "2026-03-20"
-            [ pending bou mun
+            [ final bou 2 2 mun
             ]
         , Day "Saturday"
             "2026-03-21"
-            [ pending bha liv
-            , pending ful bur
-            , pending eve che
+            [ final bha 2 1 liv
+            , final ful 3 1 bur
+            , final eve 3 0 che
             , pending lee bre
             ]
         , Day "Sunday"
