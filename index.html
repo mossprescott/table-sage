@@ -21126,6 +21126,14 @@ var $terezka$elm_charts$Chart$chart = F2(
 	function (edits, unindexedElements) {
 		return A2($terezka$elm_charts$Chart$chartAndPlane, edits, unindexedElements).a;
 	});
+var $terezka$elm_charts$Chart$Attributes$domain = function (v) {
+	return $terezka$elm_charts$Internal$Helpers$Attribute(
+		function (config) {
+			return _Utils_update(
+				config,
+				{domain: v});
+		});
+};
 var $terezka$elm_charts$Internal$Many$Remodel = F2(
 	function (a, b) {
 		return {$: 'Remodel', a: a, b: b};
@@ -23403,6 +23411,25 @@ var $terezka$elm_charts$Internal$Property$stacked = function (properties) {
 		A3(stack, configs, _List_Nil, _List_Nil));
 };
 var $terezka$elm_charts$Chart$stacked = $terezka$elm_charts$Internal$Property$stacked;
+var $elm$core$Array$toIndexedList = function (array) {
+	var len = array.a;
+	var helper = F2(
+		function (entry, _v0) {
+			var index = _v0.a;
+			var list = _v0.b;
+			return _Utils_Tuple2(
+				index - 1,
+				A2(
+					$elm$core$List$cons,
+					_Utils_Tuple2(index, entry),
+					list));
+		});
+	return A3(
+		$elm$core$Array$foldr,
+		helper,
+		_Utils_Tuple2(len - 1, _List_Nil),
+		array).b;
+};
 var $terezka$elm_charts$Internal$Item$getLimitsIn = F2(
 	function (plane, _v0) {
 		var item = _v0.b;
@@ -26163,6 +26190,36 @@ var $terezka$elm_charts$Chart$xLabels = function (edits) {
 };
 var $author$project$Sage$Plot$plot = F6(
 	function (onHover, options, width, height, data, hovering) {
+		var yBounds = A2(
+			$elm$core$List$concatMap,
+			function (_v18) {
+				var scores = _v18.b;
+				return A2(
+					$elm$core$List$concatMap,
+					function (_v19) {
+						var idx = _v19.a;
+						var s = _v19.b;
+						var r = idx + 1;
+						var adjust = function (v) {
+							return _Utils_eq(options.style, $author$project$Sage$Plot$Flatter) ? (v - r) : v;
+						};
+						return _List_fromArray(
+							[
+								adjust(s.minPossible),
+								adjust(s.maxPossible)
+							]);
+					},
+					$elm$core$Array$toIndexedList(scores));
+			},
+			data);
+		var yHigh = A2(
+			$elm$core$Maybe$withDefault,
+			100,
+			$elm$core$List$maximum(yBounds));
+		var yLow = A2(
+			$elm$core$Maybe$withDefault,
+			0,
+			$elm$core$List$minimum(yBounds));
 		var toY = F3(
 			function (field, scores, round) {
 				return A2(
@@ -26485,6 +26542,12 @@ var $author$project$Sage$Plot$plot = F6(
 									return A2($terezka$elm_charts$Chart$Attributes$highest, r + 0.5, $terezka$elm_charts$Chart$Attributes$exactly);
 								},
 								options.maxRound))
+						])),
+					$terezka$elm_charts$Chart$Attributes$domain(
+					_List_fromArray(
+						[
+							A2($terezka$elm_charts$Chart$Attributes$lowest, yLow, $terezka$elm_charts$Chart$Attributes$orLower),
+							A2($terezka$elm_charts$Chart$Attributes$highest, yHigh, $terezka$elm_charts$Chart$Attributes$orHigher)
 						])),
 					A2(
 					$terezka$elm_charts$Chart$Events$onMouseMove,

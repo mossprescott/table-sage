@@ -411,6 +411,37 @@ plot onHover options width height data hovering =
 
                 Nothing ->
                     []
+
+        -- Y-axis bounds that cover every team's min/max-possible band across all rounds,
+        -- so the domain stays fixed whether or not spreadRounds are rendered.
+        yBounds : List Float
+        yBounds =
+            data
+                |> List.concatMap
+                    (\( _, scores ) ->
+                        Array.toIndexedList scores
+                            |> List.concatMap
+                                (\( idx, s ) ->
+                                    let
+                                        r =
+                                            idx + 1
+
+                                        adjust v =
+                                            if options.style == Flatter then
+                                                v - toFloat r
+
+                                            else
+                                                v
+                                    in
+                                    [ adjust s.minPossible, adjust s.maxPossible ]
+                                )
+                    )
+
+        yLow =
+            List.minimum yBounds |> Maybe.withDefault 0
+
+        yHigh =
+            List.maximum yBounds |> Maybe.withDefault 100
     in
     C.chart
         [ CA.height <| toFloat height
@@ -424,8 +455,10 @@ plot onHover options width height data hovering =
                 |> Maybe.map (\r -> CA.highest (toFloat r + 0.5) CA.exactly)
                 |> Maybe.withDefault (CA.highest 19.5 CA.orHigher)
             ]
-
-        -- , CA.domain [ CA.lowest 0 CA.orLower, CA.highest 40 CA.orHigher ]
+        , CA.domain
+            [ CA.lowest yLow CA.orLower
+            , CA.highest yHigh CA.orHigher
+            ]
         , CE.onMouseMove onHover (CE.getNearest CI.dots)
         , CE.onMouseLeave (onHover [])
         ]
