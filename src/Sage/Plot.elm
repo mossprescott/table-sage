@@ -442,6 +442,12 @@ plot onHover options width height data hovering =
 
         yHigh =
             List.maximum yBounds |> Maybe.withDefault 100
+
+        teamNames =
+            List.map (Tuple.first >> .name) data
+
+        namedDots =
+            CI.andThen (CI.named teamNames) CI.dots
     in
     C.chart
         [ CA.height <| toFloat height
@@ -459,7 +465,7 @@ plot onHover options width height data hovering =
             [ CA.lowest yLow CA.orLower
             , CA.highest yHigh CA.orHigher
             ]
-        , CE.onMouseMove onHover (CE.getNearest CI.dots)
+        , CE.onMouseMove onHover (CE.getNearest namedDots)
         , CE.onMouseLeave (onHover [])
         ]
     <|
@@ -470,7 +476,7 @@ plot onHover options width height data hovering =
             ++ List.map spreadRounds (displayed |> List.filter (\( t, _ ) -> Set.member t.shortName focusedTeams))
             ++ List.map rounds displayed
             ++ [ C.each hovering tooltip
-               , C.eachDot legendTip
+               , C.eachCustom namedDots legendTip
 
                --    , C.legendsAt .max
                --         .max
