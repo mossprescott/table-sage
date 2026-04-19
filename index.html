@@ -5055,11 +5055,10 @@ var $elm$core$Set$toList = function (_v0) {
 var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
-var $elm$core$Basics$False = {$: 'False'};
-var $author$project$App$PredictStatsFlat = {$: 'PredictStatsFlat'};
-var $author$project$Sage$Plot$Simple = {$: 'Simple'};
+var $author$project$Sage$Plot$Flatter = {$: 'Flatter'};
+var $author$project$App$PredictStatsHomeAndAway = {$: 'PredictStatsHomeAndAway'};
 var $elm$core$Basics$True = {$: 'True'};
-var $author$project$App$init = {hovering: _List_Nil, predictOption: $author$project$App$PredictStatsFlat, predictRounds: 2, recentOnly: true, style: $author$project$Sage$Plot$Simple, taller: false};
+var $author$project$App$init = {hovering: _List_Nil, predictOption: $author$project$App$PredictStatsHomeAndAway, predictRounds: 5, recentOnly: true, style: $author$project$Sage$Plot$Flatter, taller: true};
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -5081,6 +5080,7 @@ var $elm$core$Result$Ok = function (a) {
 var $elm$json$Json$Decode$OneOf = function (a) {
 	return {$: 'OneOf', a: a};
 };
+var $elm$core$Basics$False = {$: 'False'};
 var $elm$core$Basics$add = _Basics_add;
 var $elm$core$Maybe$Just = function (a) {
 	return {$: 'Just', a: a};
@@ -17904,6 +17904,14 @@ var $author$project$Sage$EPL2025$matches = _List_fromArray(
 						A4($author$project$Sage$Football$final, $author$project$Sage$EPL2025$new, 1, 2, $author$project$Sage$EPL2025$sun),
 						A4($author$project$Sage$Football$final, $author$project$Sage$EPL2025$avl, 2, 0, $author$project$Sage$EPL2025$whu),
 						A4($author$project$Sage$Football$final, $author$project$Sage$EPL2025$tot, 0, 3, $author$project$Sage$EPL2025$nfo)
+					])),
+				A3(
+				$author$project$Sage$Football$Day,
+				'Friday',
+				'2026-05-22',
+				_List_fromArray(
+					[
+						A2($author$project$Sage$Football$pending, $author$project$Sage$EPL2025$mci, $author$project$Sage$EPL2025$cry)
 					]))
 			])),
 		A2(
@@ -18125,11 +18133,10 @@ var $author$project$Sage$EPL2025$matches = _List_fromArray(
 			]))
 	]);
 var $author$project$App$DecrementPredictedRounds = {$: 'DecrementPredictedRounds'};
-var $author$project$Sage$Plot$Flatter = {$: 'Flatter'};
 var $author$project$App$IncrementPredictedRounds = {$: 'IncrementPredictedRounds'};
 var $author$project$App$PredictEvenOdds = {$: 'PredictEvenOdds'};
 var $author$project$App$PredictHostWins = {$: 'PredictHostWins'};
-var $author$project$App$PredictStatsHomeAndAway = {$: 'PredictStatsHomeAndAway'};
+var $author$project$App$PredictStatsFlat = {$: 'PredictStatsFlat'};
 var $author$project$App$SelectPredictor = function (a) {
 	return {$: 'SelectPredictor', a: a};
 };
@@ -18142,6 +18149,7 @@ var $author$project$App$SelectStyle = function (a) {
 var $author$project$App$SelectTaller = function (a) {
 	return {$: 'SelectTaller', a: a};
 };
+var $author$project$Sage$Plot$Simple = {$: 'Simple'};
 var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
 	return {$: 'AlignY', a: a};
 };
@@ -26938,7 +26946,7 @@ var $author$project$App$view = function (model) {
 						[
 							$mdgriffith$elm_ui$Element$Font$size(16)
 						]),
-					$mdgriffith$elm_ui$Element$text('Premier League 2025–6: First Half')),
+					$mdgriffith$elm_ui$Element$text('Premier League 2025–6')),
 					A2(
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(

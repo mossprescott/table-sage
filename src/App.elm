@@ -43,10 +43,10 @@ type PredictOption
 init : Model
 init =
     { hovering = []
-    , predictOption = PredictStatsFlat
-    , predictRounds = 2
-    , style = Simple
-    , taller = False
+    , predictOption = PredictStatsHomeAndAway
+    , predictRounds = 5
+    , style = Flatter
+    , taller = True
     , recentOnly = True
     }
 
@@ -180,7 +180,7 @@ view model =
             ]
             [ optionsView model
             , el [ Font.size 16 ] <|
-                text "Premier League 2025–6: First Half"
+                text "Premier League 2025–6"
             , el
                 [ Element.height <| Element.px (plotHeight model + 100)
                 , Element.width <| Element.px (plotWidth + 100)
