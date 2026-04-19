@@ -737,6 +737,10 @@ matches =
             , final avl 2 0 whu
             , final tot 0 3 nfo
             ]
+        , Day "Friday"
+            "2026-05-22"
+            [ pending mci cry
+            ]
         ]
     , Round 32
         [ Day "Friday"
