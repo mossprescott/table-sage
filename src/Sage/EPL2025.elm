@@ -729,53 +729,53 @@ matches =
             [ final bha 2 1 liv
             , final ful 3 1 bur
             , final eve 3 0 che
-            , pending lee bre
+            , final lee 0 0 bre
             ]
         , Day "Sunday"
             "2026-03-22"
-            [ pending new sun
-            , pending avl whu
-            , pending tot nfo
+            [ final new 1 2 sun
+            , final avl 2 0 whu
+            , final tot 0 3 nfo
             ]
         ]
     , Round 32
         [ Day "Friday"
             "2026-04-10"
-            [ pending whu wol
+            [ final whu 4 0 wol
             ]
         , Day "Saturday"
             "2026-04-11"
-            [ pending ars bou
-            , pending bre eve
-            , pending bur bha
-            , pending cry new
-            , pending nfo avl
-            , pending liv ful
+            [ final ars 1 2 bou
+            , final bre 2 2 eve
+            , final bur 0 2 bha
+            , final liv 2 0 ful
             ]
         , Day "Sunday"
             "2026-04-12"
-            [ pending sun tot
-            , pending che mci
+            [ final cry 1 2 new
+            , final nfo 1 1 avl
+            , final sun 0 1 tot
+            , final che 0 3 mci
             ]
         , Day "Monday"
             "2026-04-13"
-            [ pending mun lee
+            [ final mun 1 2 lee
             ]
         ]
     , Round 33
         [ Day "Saturday"
             "2026-04-18"
-            [ pending bre ful
-            , pending avl sun
-            , pending lee wol
-            , pending new bou
-            , pending nfo bur
-            , pending tot bha
-            , pending che mun
+            [ final bre 0 0 ful
+            , final lee 3 0 wol
+            , final new 1 2 bou
+            , final tot 2 2 bha
+            , final che 0 1 mun
             ]
         , Day "Sunday"
             "2026-04-19"
-            [ pending eve liv
+            [ pending avl sun
+            , pending nfo bur
+            , pending eve liv
             , pending mci ars
             ]
         , Day "Monday"
