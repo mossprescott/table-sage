@@ -18942,6 +18942,25 @@ var $author$project$App$optionsView = function (model) {
 					]))
 			]));
 };
+var $terezka$elm_charts$Internal$Many$Remodel = F2(
+	function (a, b) {
+		return {$: 'Remodel', a: a, b: b};
+	});
+var $terezka$elm_charts$Internal$Many$andThen = F2(
+	function (_v0, _v1) {
+		var toPos2 = _v0.a;
+		var func2 = _v0.b;
+		var toPos1 = _v1.a;
+		var func1 = _v1.b;
+		return A2(
+			$terezka$elm_charts$Internal$Many$Remodel,
+			toPos2,
+			function (items) {
+				return func2(
+					func1(items));
+			});
+	});
+var $terezka$elm_charts$Chart$Item$andThen = $terezka$elm_charts$Internal$Many$andThen;
 var $terezka$elm_charts$Internal$Helpers$Attribute = function (a) {
 	return {$: 'Attribute', a: a};
 };
@@ -21134,10 +21153,6 @@ var $terezka$elm_charts$Chart$Attributes$domain = function (v) {
 				{domain: v});
 		});
 };
-var $terezka$elm_charts$Internal$Many$Remodel = F2(
-	function (a, b) {
-		return {$: 'Remodel', a: a, b: b};
-	});
 var $terezka$elm_charts$Internal$Coordinates$center = function (pos) {
 	return {x: pos.x1 + ((pos.x2 - pos.x1) / 2), y: pos.y1 + ((pos.y2 - pos.y1) / 2)};
 };
@@ -21196,49 +21211,24 @@ var $terezka$elm_charts$Chart$each = F2(
 						items);
 				}));
 	});
-var $terezka$elm_charts$Internal$Many$andThen = F2(
-	function (_v0, _v1) {
-		var toPos2 = _v0.a;
-		var func2 = _v0.b;
-		var toPos1 = _v1.a;
-		var func1 = _v1.b;
-		return A2(
-			$terezka$elm_charts$Internal$Many$Remodel,
-			toPos2,
-			function (items) {
-				return func2(
-					func1(items));
-			});
-	});
-var $terezka$elm_charts$Chart$Item$andThen = $terezka$elm_charts$Internal$Many$andThen;
 var $terezka$elm_charts$Internal$Many$apply = F2(
 	function (_v0, items) {
 		var func = _v0.b;
 		return func(items);
 	});
 var $terezka$elm_charts$Chart$Item$apply = $terezka$elm_charts$Internal$Many$apply;
-var $terezka$elm_charts$Internal$Item$isReal = function (_v0) {
-	var meta = _v0.a;
-	return meta.isReal;
-};
-var $terezka$elm_charts$Internal$Many$real = A2(
-	$terezka$elm_charts$Internal$Many$Remodel,
-	$terezka$elm_charts$Internal$Item$getTopLevelPosition,
-	$elm$core$List$filter($terezka$elm_charts$Internal$Item$isReal));
-var $terezka$elm_charts$Chart$Item$real = $terezka$elm_charts$Internal$Many$real;
-var $terezka$elm_charts$Chart$eachDot = function (func) {
-	return $terezka$elm_charts$Chart$SubElements(
-		F2(
-			function (p, is) {
-				return A2(
-					$elm$core$List$concatMap,
-					func(p),
-					A2(
-						$terezka$elm_charts$Chart$Item$apply,
-						A2($terezka$elm_charts$Chart$Item$andThen, $terezka$elm_charts$Chart$Item$real, $terezka$elm_charts$Chart$Item$dots),
-						is));
-			}));
-};
+var $terezka$elm_charts$Chart$eachCustom = F2(
+	function (grouping, func) {
+		return $terezka$elm_charts$Chart$SubElements(
+			F2(
+				function (p, items) {
+					var processed = A2($terezka$elm_charts$Chart$Item$apply, grouping, items);
+					return A2(
+						$elm$core$List$concatMap,
+						func(p),
+						processed);
+				}));
+	});
 var $terezka$elm_charts$Chart$Attributes$exactly = F3(
 	function (exact, _v0, _v1) {
 		return exact;
@@ -21874,6 +21864,29 @@ var $terezka$elm_charts$Internal$Property$name = F2(
 var $terezka$elm_charts$Chart$named = function (name) {
 	return $terezka$elm_charts$Internal$Property$name(name);
 };
+var $terezka$elm_charts$Internal$Item$getName = function (_v0) {
+	var meta = _v0.a;
+	var _v1 = meta.name;
+	if (_v1.$ === 'Just') {
+		var name = _v1.a;
+		return name;
+	} else {
+		return 'Property #' + $elm$core$String$fromInt(meta.identification.absoluteIndex + 1);
+	}
+};
+var $terezka$elm_charts$Internal$Many$named = function (names) {
+	var onlyAcceptedNames = function (i) {
+		return A2(
+			$elm$core$List$member,
+			$terezka$elm_charts$Internal$Item$getName(i),
+			names);
+	};
+	return A2(
+		$terezka$elm_charts$Internal$Many$Remodel,
+		$terezka$elm_charts$Internal$Item$getTopLevelPosition,
+		$elm$core$List$filter(onlyAcceptedNames));
+};
+var $terezka$elm_charts$Chart$Item$named = $terezka$elm_charts$Internal$Many$named;
 var $terezka$elm_charts$Internal$Svg$LeftOrRight = {$: 'LeftOrRight'};
 var $terezka$elm_charts$Chart$Attributes$onLeftOrRight = $terezka$elm_charts$Internal$Helpers$Attribute(
 	function (config) {
@@ -26229,6 +26242,15 @@ var $author$project$Sage$Plot$plot = F6(
 					},
 					A2($elm$core$Array$get, round - 1, scores));
 			});
+		var teamNames = A2(
+			$elm$core$List$map,
+			A2(
+				$elm$core$Basics$composeR,
+				$elm$core$Tuple$first,
+				function ($) {
+					return $.name;
+				}),
+			data);
 		var scoreForDot = function (_v17) {
 			var round = _v17.a;
 			var team = _v17.b;
@@ -26341,6 +26363,10 @@ var $author$project$Sage$Plot$plot = F6(
 								score)))
 					]);
 			});
+		var namedDots = A2(
+			$terezka$elm_charts$Chart$Item$andThen,
+			$terezka$elm_charts$Chart$Item$named(teamNames),
+			$terezka$elm_charts$Chart$Item$dots);
 		var legendTip = F2(
 			function (_v11, item) {
 				var _v8 = $terezka$elm_charts$Chart$Item$getData(item);
@@ -26552,7 +26578,7 @@ var $author$project$Sage$Plot$plot = F6(
 					A2(
 					$terezka$elm_charts$Chart$Events$onMouseMove,
 					onHover,
-					$terezka$elm_charts$Chart$Events$getNearest($terezka$elm_charts$Chart$Item$dots)),
+					$terezka$elm_charts$Chart$Events$getNearest(namedDots)),
 					$terezka$elm_charts$Chart$Events$onMouseLeave(
 					onHover(_List_Nil))
 				]),
@@ -26582,7 +26608,7 @@ var $author$project$Sage$Plot$plot = F6(
 						_List_fromArray(
 							[
 								A2($terezka$elm_charts$Chart$each, hovering, tooltip),
-								$terezka$elm_charts$Chart$eachDot(legendTip)
+								A2($terezka$elm_charts$Chart$eachCustom, namedDots, legendTip)
 							])))));
 	});
 var $author$project$App$plotHeight = function (model) {
