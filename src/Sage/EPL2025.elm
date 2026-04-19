@@ -777,9 +777,9 @@ matches =
             ]
         , Day "Sunday"
             "2026-04-19"
-            [ pending avl sun
-            , pending nfo bur
-            , pending eve liv
+            [ final avl 4 3 sun
+            , final nfo 4 1 bur
+            , final eve 1 2 liv
             , pending mci ars
             ]
         , Day "Monday"
