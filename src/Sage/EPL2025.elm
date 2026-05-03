@@ -780,7 +780,7 @@ matches =
             [ final avl 4 3 sun
             , final nfo 4 1 bur
             , final eve 1 2 liv
-            , pending mci ars
+            , final mci 2 1 ars
             ]
         , Day "Monday"
             "2026-04-20"
@@ -788,42 +788,54 @@ matches =
             ]
         ]
     , Round 34
-        [ Day "Friday"
+        [ Day "Tuesday"
+            "2026-04-21"
+            [ final bha 3 0 che
+            ]
+        , Day "Wednesday"
+            "2026-04-22"
+            [ final bur 0 1 mci
+            ]
+        , Day "Friday"
             "2026-04-24"
-            [ pending sun nfo
+            [ final sun 0 5 nfo
             ]
         , Day "Saturday"
             "2026-04-25"
-            [ pending ful avl
-            , pending bou lee
-            , pending liv cry
-            , pending whu eve
-            , pending wol tot
-            , pending ars new
-            ]
-        , Day "Sunday"
-            "2026-04-26"
-            [ pending bur mci
-            , pending bha che
+            [ final ful 1 0 avl
+            , final bou 2 2 lee
+            , final liv 3 1 cry
+            , final whu 2 1 eve
+            , final wol 0 1 tot
+            , final ars 1 0 new
             ]
         , Day "Monday"
             "2026-04-27"
-            [ pending mun bre
+            [ final mun 2 1 bre
             ]
         ]
     , Round 35
-        [ Day "Saturday"
+        [ Day "Friday"
+            "2026-05-01"
+            [ final lee 3 1 bur
+            ]
+        , Day "Saturday"
             "2026-05-02"
-            [ pending bou cry
-            , pending ars ful
-            , pending avl tot
-            , pending bre whu
-            , pending che nfo
+            [ final bre 3 0 whu
+            , final new 3 1 bha
+            , final wol 1 1 sun
+            , final ars 3 0 ful
+            ]
+        , Day "Sunday"
+            "2026-05-03"
+            [ final bou 3 0 cry
+            , final mun 3 2 liv
+            , final avl 1 2 tot
+            ]
+        , Day "Monday"
+            "2026-05-04"
+            [ pending che nfo
             , pending eve mci
-            , pending lee bur
-            , pending mun liv
-            , pending new bha
-            , pending wol sun
             ]
         ]
     , Round 36
