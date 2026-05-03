@@ -758,7 +758,7 @@ matches =
             "2026-04-12"
             [ final cry 1 2 new
             , final nfo 1 1 avl
-            , final sun 0 1 tot
+            , final sun 1 0 tot
             , final che 0 3 mci
             ]
         , Day "Monday"
