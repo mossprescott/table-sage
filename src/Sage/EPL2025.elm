@@ -834,8 +834,8 @@ matches =
             ]
         , Day "Monday"
             "2026-05-04"
-            [ pending che nfo
-            , pending eve mci
+            [ final che 1 3 nfo
+            , final eve 3 3 mci
             ]
         ]
     , Round 36
