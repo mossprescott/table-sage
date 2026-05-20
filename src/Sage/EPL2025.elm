@@ -737,9 +737,9 @@ matches =
             , final avl 2 0 whu
             , final tot 0 3 nfo
             ]
-        , Day "Friday"
-            "2026-05-22"
-            [ pending mci cry
+        , Day "Wednesday"
+            "2026-05-13"
+            [ final mci 3 0 cry
             ]
         ]
     , Round 32
@@ -841,31 +841,46 @@ matches =
     , Round 36
         [ Day "Saturday"
             "2026-05-09"
-            [ pending bha wol
-            , pending bur avl
-            , pending cry eve
-            , pending ful bou
-            , pending liv che
-            , pending mci bre
-            , pending nfo new
-            , pending sun mun
-            , pending tot lee
-            , pending whu ars
+            [ final bha 3 0 wol
+            , final liv 1 1 che
+            , final mci 3 0 bre
+            , final sun 0 0 mun
+            ]
+        , Day "Sunday"
+            "2026-05-10"
+            [ final bur 2 2 avl
+            , final cry 2 2 eve
+            , final ful 0 1 bou
+            , final nfo 1 1 new
+            , final whu 0 1 ars
+            ]
+        , Day "Monday"
+            "2026-05-11"
+            [ final tot 1 1 lee
             ]
         ]
     , Round 37
-        [ Day "Sunday"
+        [ Day "Friday"
+            "2026-05-15"
+            [ final avl 4 2 liv
+            ]
+        , Day "Sunday"
             "2026-05-17"
-            [ pending bou mci
-            , pending ars bur
-            , pending avl liv
-            , pending bre cry
-            , pending che tot
-            , pending eve sun
-            , pending lee bha
-            , pending mun nfo
-            , pending new whu
-            , pending wol ful
+            [ final bre 2 2 cry
+            , final eve 1 3 sun
+            , final lee 1 0 bha
+            , final mun 3 2 nfo
+            , final new 3 1 whu
+            , final wol 1 1 ful
+            ]
+        , Day "Monday"
+            "2026-05-18"
+            [ final ars 1 0 bur
+            ]
+        , Day "Tuesday"
+            "2026-05-19"
+            [ final bou 1 1 mci
+            , final che 2 1 tot
             ]
         ]
     , Round 38
