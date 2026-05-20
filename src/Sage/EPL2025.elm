@@ -756,7 +756,7 @@ matches =
             ]
         , Day "Sunday"
             "2026-04-12"
-            [ final cry 1 2 new
+            [ final cry 2 1 new
             , final nfo 1 1 avl
             , final sun 1 0 tot
             , final che 0 3 mci
@@ -784,7 +784,7 @@ matches =
             ]
         , Day "Monday"
             "2026-04-20"
-            [ pending cry whu
+            [ final cry 0 0 whu
             ]
         ]
     , Round 34
